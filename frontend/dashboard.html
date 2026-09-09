@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | IIEST Shibpur</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <div class="dashboard-layout">
+        
+        <aside class="sidebar glass-panel" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-table-columns" style="margin-right: 8px;"></i> Dashboard</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="view-home">
+                    <i class="fa-solid fa-house"></i> <span data-translate="Home">Home</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-registration">
+                    <i class="fa-solid fa-pen-to-square"></i> <span data-translate="Registration Form">Registration Form</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-pdf">
+    <i class="fa-solid fa-file-pdf"></i>
+    <span>Generate PDF</span>
+</a>
+                <a href="#" class="nav-item" data-target="view-history">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-translate="History">History</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-settings">
+                    <i class="fa-solid fa-gear"></i> <span data-translate="Settings">Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile" id="sidebarUserProfile" style="cursor: pointer;" title="Go to Profile Settings">
+                    <div class="avatar"></div> 
+                    <div class="user-info">
+                        <span class="name">Student</span>
+                        <span class="roll"></span>
+                    </div>
+                </div>
+                <a href="index.html" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span data-translate="Logout">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="topbar solid-card">
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 20px;">
+                    <button class="action-btn" id="sidebarToggle" title="Toggle Sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    
+                    <div class="institute-banner-top" id="homeBanner">
+                        <img src="./logo.png" alt="IIEST Logo" class="institute-logo" id="instituteLogo">
+                        <div class="institute-text">
+                            <div class="lang-text bn">ভারতীয় প্রকৌশল বিজ্ঞান এবং প্রযুক্তিবিদ্যা প্রতিষ্ঠান, শিবপুর</div>
+                            <div class="lang-text hi">भारतीय अभियांत्रिकी विज्ञान एवं प्रौद्योगिकी संस्थान, शिवपुर</div>
+                            <div class="lang-text en">INDIAN INSTITUTE OF ENGINEERING SCIENCE AND TECHNOLOGY, SHIBPUR</div>
+                            <div class="sub-text blue">Erstwhile B.E. College, Estd. 1856</div>
+                            <div class="sub-text italic">An Institute of National Importance under Ministry of Education, Government of India</div>
+                        </div>
+                    </div>
+
+                    <h1 class="page-title d-none" id="pageTitle">Registration Form</h1>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="action-btn" id="themeToggle" title="Toggle Light/Dark Mode">
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    </button>
+                    <button class="action-btn" title="About">
+                        <i class="fa-solid fa-circle-info"></i> <span data-translate="About">About</span>
+                    </button>
+                    
+                    <div class="dropdown">
+                        <button class="action-btn dropbtn">
+                            <i class="fa-regular fa-circle-question"></i> <span data-translate="Help">Help</span>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#"><i class="fa-solid fa-phone"></i> Contact Us</a>
+                            <a href="#"><i class="fa-solid fa-clipboard-question"></i> FAQ</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area glass-panel">
+                
+                <!-- VIEW: HOME -->
+                <div id="view-home" class="view-section active">
+                    <div class="home-main-col">
+                        <div class="greeting-box glass-card">
+                            <h2 class="gold-text">Welcome back!</h2>
+                            <p>The semester registration portal is currently open. Ensure all your fee dues are cleared before generating your registration draft.</p>
+                        </div>
+
+                        <div class="status-cards">
+                            <div class="status-card glass-card">
+                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                                <h4>Fee Status</h4>
+                                <p class="text-success">Cleared</p>
+                            </div>
+                            <div class="status-card glass-card">
+                                <i class="fa-solid fa-clipboard-check"></i>
+                                <h4>Reg Status</h4>
+                                <p class="text-warning">Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: REGISTRATION FORM -->
+                <div id="view-registration" class="view-section d-none">
+                    <form class="registration-form glass-card" id="regForm">
+                        <div class="form-title-wrapper">
+                            <h2 class="gold-text">Semester Registration Form</h2>
+                            <p class="subtitle">For Undergraduate / Postgraduate Courses</p>
+                        </div>
+    
+                        <div class="form-section">
+                            <div class="section-header">1. Personal & Academic Details</div>
+                            <div class="section-body grid-2-col">
+                                <div class="input-group">
+                                    <label>1(a). Name (in English)</label>
+                                    <input type="text" id="regNameEnglish" placeholder="Enter your full name" class="glass-input" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>1(b). Name (in Hindi)</label>
+                                    <div style="display:flex; gap:8px; align-items:stretch;">
+                                        <input type="text" id="regNameHindi" placeholder="Type name in English, then click अ" class="glass-input">
+                                        <button type="button" id="transliterateNameBtn" class="action-btn" style="flex-shrink:0; padding:10px 14px;" title="Convert typed English letters to Hindi">अ</button>
+                                    </div>
+                                    <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">
+                                        Type your name phonetically in English (e.g. "priya", "raahul") then click <strong>अ</strong>. Use "aa" for a long आ sound, e.g. "raahul" → राहुल.
+                                    </p>
+                                </div>
+                                <div class="input-group">
+                                    <label>2. Department</label>
+                                    <input type="text" placeholder="e.g. Computer Science and Technology (CST)" class="glass-input" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>3. Programme</label>
+                                    <select class="glass-input">
+                                        <option value="" selected disabled>Select programme</option>
+                                        <option value="B.Tech">B.Tech.</option>
+                                        <option value="M.Tech">M.Tech.</option>
+                                        <option value="Dual Degree">Dual Degree</option>
+                                        <option value="PhD">PhD</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>4. Specialization</label>
+                                    <input type="text" placeholder="e.g. N/A" class="glass-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>5. Registration for Semester</label>
+                                    <select class="glass-input">
+                                        <option value="" selected disabled>Select semester</option>
+                                        <option value="1">1st Semester</option>
+                                        <option value="2">2nd Semester</option>
+                                        <option value="3">3rd Semester</option>
+                                        <option value="4">4th Semester</option>
+                                        <option value="5">5th Semester</option>
+                                        <option value="6">6th Semester</option>
+                                        <option value="7">7th Semester</option>
+                                        <option value="8">8th Semester</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>6. Enrolment No</label>
+                                    <input type="text" placeholder="Enter your enrolment number" class="glass-input" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>7. G-suite ID</label>
+                                    <input type="email" placeholder="your.id@students.iiests.ac.in" class="glass-input" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>8. Mobile No.</label>
+                                    <input type="tel" placeholder="Enter your mobile number" class="glass-input" maxlength="10" required>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="form-section">
+                            <div class="section-header">2. Details of Institute Fee Payment</div>
+                            <div class="section-body grid-2-col">
+                                <div class="input-group">
+                                    <label>9(a). Amount Paid (Rs.)</label>
+                                    <input type="number" placeholder="e.g. 45000" class="glass-input" min="0" step="1" oninput="this.value = Math.abs(this.value)" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>9(b). Payment Date</label>
+                                    <input type="date" class="glass-input" id="paymentDate" required>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="form-section">
+                            <div class="section-header">3. Subject Details (Theory)</div>
+                            <div class="section-body table-responsive">
+                                <table class="glass-table" id="theoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl. No</th>
+                                            <th>Subject Code</th>
+                                            <th>Name of the Subject (Theory)</th>
+                                            <th>Core/Elective</th>
+                                            <th>Credit</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Populated via JS -->
+                                    </tbody>
+                                </table>
+                                <button type="button" class="add-row-btn" onclick="addRow('theoryTable')"><i class="fa-solid fa-plus"></i> Add Row</button>
+                            </div>
+                        </div>
+
+                        <div class="declaration-box">
+                            <label class="checkbox-container">
+                                <input type="checkbox" required>
+                                I declare that the information provided is correct. I have carefully scrutinized the entered subjects.
+                            </label>
+                        </div>
+    
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- VIEW: GENERATE PDF -->
+<div id="view-pdf" class="view-section d-none">
+
+    <div class="form-title-wrapper">
+        <h2 class="gold-text">Generate PDF</h2>
+        <p class="subtitle">
+            Generate and view your semester registration PDF.
+        </p>
+    </div>
+
+    <div class="pdf-container">
+        <div id="pdfLoading" class="pdf-message d-none">
+            Generating PDF...
+        </div>
+
+        <div id="pdfError" class="pdf-message d-none"></div>
+
+        <iframe
+            id="pdfViewer"
+            title="Registration PDF">
+        </iframe>
+    </div>
+
+</div>
+
+                <!-- VIEW: HISTORY -->
+                <div id="view-history" class="view-section d-none">
+                    <div class="form-title-wrapper">
+                        <h2 class="gold-text" data-translate="History">Registration History</h2>
+                        <p class="subtitle">View and download your past semester registration records.</p>
+                    </div>
+
+                    <div class="history-grid">
+                        <!-- Registration history will appear here once records exist. -->
+                        <p class="subtitle" style="grid-column: 1 / -1;">No registration history yet.</p>
+                    </div>
+                </div>
+
+                <!-- VIEW: SETTINGS -->
+                <div id="view-settings" class="view-section d-none">
+                    <div class="form-title-wrapper">
+                        <h2 class="gold-text" data-translate="Account Settings">Account Settings</h2>
+                        <p class="subtitle" data-translate="Manage your profile, security, and portal preferences.">Manage your profile, security, and portal preferences.</p>
+                    </div>
+
+                    <div id="google_translate_element" style="display: none;"></div>
+
+                    <div class="grid-2-col">
+                        <div class="settings-left-col" style="display: flex; flex-direction: column; gap: 24px;">
+                            
+                            <div class="form-section" id="profileSettingsSection" style="margin-bottom: 0;">
+                                <div class="section-header"><i class="fa-solid fa-user"></i> <span data-translate="Profile Settings">Profile Details</span></div>
+                                <div class="section-body">
+                                    <form id="profileForm" style="display: flex; flex-direction: column; gap: 16px;">
+                                        
+                                        <div class="profile-avatar-container">
+                                            <div class="avatar-wrapper">
+                                                <div class="avatar large-avatar" id="settingsAvatar"></div>
+                                                <button type="button" id="uploadPhotoBtn" class="avatar-upload-btn" title="Verify to Upload Photo">
+                                                    <i class="fa-solid fa-camera"></i>
+                                                </button>
+                                                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                                            </div>
+                                            <div class="avatar-info">
+                                                <h4 style="color: var(--text-main);">Student</h4>
+                                                <p style="font-size: 0.8rem; color: var(--text-muted);"></p>
+                                                <button type="button" class="action-btn" id="removeAvatarBtn" style="padding: 4px 10px; font-size: 0.75rem; margin-top: 8px;"><i class="fa-solid fa-lock" style="font-size:0.6rem; margin-right:4px;"></i> Remove Photo</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="input-group">
+                                            <label>Name (in English)</label>
+                                            <input type="text" value="" readonly class="readonly-input">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Name (in Hindi)</label>
+                                            <div style="display:flex; gap:8px; align-items:stretch;">
+                                                <input type="text" id="profileNameHindi" placeholder="Type name in English, then click अ" class="glass-input">
+                                                <button type="button" id="transliterateProfileNameBtn" class="action-btn" style="flex-shrink:0; padding:10px 14px;" title="Convert typed English letters to Hindi">अ</button>
+                                            </div>
+                                            <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">
+                                                Type phonetically (e.g. "priya", "raahul") then click <strong>अ</strong>. Use "aa" for a long आ sound.
+                                            </p>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Enrolment No.</label>
+                                            <input type="text" value="2025CSB120" readonly class="readonly-input">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>G-Suite ID</label>
+                                            <input type="email" value="2025csb120.aryan@students.iiests.ac.in" readonly class="readonly-input">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Department</label>
+                                            <input type="text" value="Computer Science and Technology (CST)" readonly class="readonly-input">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Programme</label>
+                                            <select class="glass-input readonly-input" disabled>
+                                                <option value="B.Tech" selected>B.Tech.</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Gender</label>
+                                            <select class="glass-input readonly-input" disabled>
+                                                <option value="male" selected>Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Specialization</label>
+                                            <input type="text" value="N/A" readonly class="readonly-input">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="settings-right-col" style="display: flex; flex-direction: column; gap: 24px;">
+                            
+                            <div class="form-section" style="margin-bottom: 0;">
+                                <div class="section-header"><i class="fa-solid fa-shield-halved"></i> <span data-translate="Security & Password">Security & Password</span></div>
+                                <div class="section-body">
+                                    <form id="securityForm" style="display: flex; flex-direction: column; gap: 16px;">
+                                        <div class="input-group">
+                                            <label>Current Password</label>
+                                            <div class="password-wrapper">
+                                                <input type="password" placeholder="Enter current password" class="glass-input" required>
+                                                <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>New Password</label>
+                                            <div class="password-wrapper">
+                                                <input type="password" id="newPass" placeholder="Enter new password" class="glass-input" minlength="8" title="Password must be at least 8 characters long" required>
+                                                <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Confirm New Password</label>
+                                            <div class="password-wrapper">
+                                                <input type="password" id="confirmPass" placeholder="Re-enter new password" class="glass-input" minlength="8" required>
+                                                <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="submit-btn" style="margin-top: 10px; padding: 12px;"><i class="fa-solid fa-key"></i> <span data-translate="Update Security">Update Password</span></button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="form-section" style="margin-bottom: 0;">
+                                <div class="section-header"><i class="fa-solid fa-address-book"></i> <span data-translate="Update Contact Info">Update Contact Info</span></div>
+                                <div class="section-body">
+                                    <form id="contactForm" style="display: flex; flex-direction: column; gap: 16px;">
+                                        <div class="input-group">
+                                            <label style="display: flex; align-items: center; justify-content: space-between;">
+                                                Mobile Number 
+                                                <button type="button" id="editMobileBtn" class="edit-btn-inline" title="Verify to Edit"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                            </label>
+                                            <input type="tel" id="mobileInput" placeholder="10-digit mobile number" class="glass-input readonly-input" pattern="[0-9]{10}" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="9876543210" required readonly>
+                                        </div>
+                                        
+                                        <button type="submit" id="saveMobileBtn" class="submit-btn" style="margin-top: 10px; padding: 12px;" disabled><i class="fa-solid fa-floppy-disk"></i> Save Mobile Number</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="form-section" style="margin-bottom: 0;">
+                                <div class="section-header"><i class="fa-solid fa-display"></i> <span data-translate="Portal Preferences">Portal Preferences</span></div>
+                                <div class="section-body" style="display: flex; flex-direction: column; gap: 16px;">
+                                    <div class="input-group">
+                                        <label>Portal Language (Auto-Translate)</label>
+                                        <select class="glass-input" id="languageSelect">
+                                            <option value="en" selected>English</option>
+                                            <option value="hi">Hindi (हिंदी)</option>
+                                            <option value="bn">Bengali (বাংলা)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section" style="margin-bottom: 0;">
+                                <div class="section-header"><i class="fa-solid fa-bell"></i> <span data-translate="Notification Preferences">Notification Preferences</span></div>
+                                <div class="section-body" style="display: flex; flex-direction: column; gap: 15px;">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" checked> Email alerts for Fee Payments & Dues
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" checked> Email alerts for Registration Drafts
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" checked> Academic Announcements & Notices
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox"> SMS Notifications for Critical Updates
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <footer>
+                © 2026 Indian Institute of Engineering Science and Technology, Shibpur
+            </footer>
+        </main>
+    </div>
+
+    <!-- OTP VERIFICATION MODAL -->
+    <div id="otpModalOverlay" class="modal-overlay d-none">
+        <div class="modal-content glass-card">
+            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-shield-check"></i> Verify it's you</h3>
+            <p class="subtitle" style="margin-bottom: 25px; font-size: 0.85rem;">To protect your account, please confirm your password and enter the OTP sent to your registered G-Suite ID.</p>
+            
+            <form id="otpForm">
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label>Account Password</label>
+                    <input type="password" placeholder="Enter password" class="glass-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 25px;">
+                    <label>OTP (Sent to email)</label>
+                    <input type="text" placeholder="Enter 6-digit OTP" class="glass-input" pattern="[0-9]{6}" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" class="action-btn" id="cancelOtpBtn" style="flex: 1; justify-content: center;">Cancel</button>
+                    <button type="submit" class="submit-btn" style="flex: 1; margin-top: 0; padding: 10px;">Verify</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

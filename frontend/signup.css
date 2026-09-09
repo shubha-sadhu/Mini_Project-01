@@ -1,0 +1,225 @@
+/*IIEST SHIBPUR
+Semester Registration Portal ; SIGNUP.CSS
+
+Loaded AFTER style.css. Deliberately small: it only adds what this
+page needs beyond the shared login look (OTP row, locked fields,
+success modal). Every color/spacing value here is pulled from the
+same --primary / --glass / --radius tokens style.css defines, so the
+two pages read as one site.*/
+
+/* Signup has more fields than login, so let the whole page scroll
+   instead of relying on style.css's `body{overflow:hidden}` (which
+   assumes everything fits in the viewport, true for the login card
+   but not this one). */
+body.signup-page {
+    overflow-y: auto;
+}
+
+body.signup-page .container {
+    align-items: start;
+    padding-top: 10px;
+}
+
+body.signup-page .left-panel,
+body.signup-page .right-panel {
+    align-items: flex-start;
+    padding-top: 40px;
+}
+
+.login-card--signup {
+    max-width: 430px;
+}
+
+/*Email/OTP row with an inline button */
+
+/* .email-group normally just wraps an input (+ optional trailing
+   span). This variant makes room for a small action button instead. */
+.input-group--with-action {
+    overflow: visible;
+    padding-right: 8px;
+    gap: 10px;
+}
+
+.input-group--with-action input {
+    min-width: 0;
+}
+
+/* Small pill button that sits inside an input group, reusing the
+   .login-btn look but sized down to fit inline. */
+.login-btn--inline {
+    width: auto;
+    flex-shrink: 0;
+    padding: 11px 20px;
+    font-size: 13px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.login-btn--inline:disabled {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(216, 216, 216, 0.5);
+    cursor: not-allowed;
+}
+
+.login-btn--inline:disabled:hover {
+    background: transparent;
+    color: rgba(216, 216, 216, 0.5);
+    box-shadow: none;
+}
+
+/* Status line under the OTP row ("OTP sent", "Email verified", errors) */
+.otp-status {
+    font-size: 0.82rem;
+    color: var(--text);
+    margin: -14px 0 18px 4px;
+    min-height: 16px;
+}
+
+.otp-status--success {
+    color: #6FE3A3;
+    font-weight: 600;
+}
+
+.otp-status--error {
+    color: #E88B8B;
+    font-weight: 600;
+}
+
+/*Locked fields*/
+
+/* Fields disabled until OTP verification succeeds. Dim the pill so it
+   visually reads as "locked", same idea as the hover/focus treatment
+   style.css already uses on .email-group / .password-group. */
+.locked-group {
+    opacity: 0.4;
+}
+
+.locked-group input:disabled {
+    cursor: not-allowed;
+}
+
+.locked-group:hover {
+    border-color: rgba(255, 255, 255, 0.12); /* suppress the gold hover glow while locked */
+}
+
+#password-icon,
+#confirm-password-icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bfbfbf;
+    font-size: 16px;
+    transition: 0.3s ease;
+}
+
+#password-icon.fa-eye,
+#password-icon.fa-eye-slash,
+#confirm-password-icon.fa-eye,
+#confirm-password-icon.fa-eye-slash {
+    cursor: pointer;
+}
+
+#password-icon.fa-eye:hover,
+#password-icon.fa-eye-slash:hover,
+#confirm-password-icon.fa-eye:hover,
+#confirm-password-icon.fa-eye-slash:hover {
+    color: var(--primary);
+}
+
+/* every label after the first should sit with a bit of breathing room
+   from the field above it, matching the rhythm of the login form */
+form label {
+    margin-top: 4px;
+}
+
+form label:first-of-type {
+    margin-top: 0;
+}
+
+/* Success modal */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.modal-overlay[hidden] {
+    display: none;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 44px 36px;
+    box-sizing: border-box;
+    border-radius: var(--radius);
+    text-align: center;
+
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+    color: var(--white);
+}
+
+.modal-card__icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-card__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.modal-card__text {
+    font-size: 0.92rem;
+    color: var(--text);
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+.modal-card .login-btn {
+    display: inline-block;
+    width: auto;
+    padding: 14px 40px;
+    text-decoration: none;
+}
+
+/* Responsive */
+
+@media (max-width: 992px) {
+    body.signup-page .left-panel,
+    body.signup-page .right-panel {
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-group--with-action {
+        flex-wrap: wrap;
+        padding: 10px 12px;
+    }
+
+    .login-btn--inline {
+        width: 100%;
+        margin-top: 4px;
+    }
+}

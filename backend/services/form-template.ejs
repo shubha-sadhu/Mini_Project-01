@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Semester Registration Form</title>
+
+<style>
+
+@page {
+    size: A4;
+    margin: 10mm 12mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 11pt;
+    color: #000;
+    line-height: 1.2;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.header .institute {
+    font-size: 13pt;
+    font-weight: bold;
+}
+
+.header .form-title {
+    font-size: 12pt;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-top: 2px;
+}
+
+
+/* =========================
+   NORMAL FIELD
+========================= */
+
+.field-line {
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+    margin: 6px 0;
+}
+
+.field-label {
+    white-space: nowrap;
+    margin-right: 5px;
+}
+
+.fill {
+    flex: 1;
+    min-width: 0;
+    border-bottom: 1px solid #000;
+    padding: 0 3px;
+}
+
+
+/* =========================
+   INDENTED FIELDS (Name a/b, Fee line)
+========================= */
+
+.indented {
+    margin-left: 45px;
+}
+
+
+/* =========================
+   TWO FIELDS ON SAME LINE
+========================= */
+
+.inline-group {
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+    gap: 22px;
+    margin: 6px 0;
+}
+
+.inline-group .field-line {
+    margin: 0;
+    min-width: 0;
+}
+
+.registration-field {
+    flex: 0 0 55%;
+}
+
+.enrolment-field {
+    flex: 1;
+}
+
+.gsuite-field {
+    flex: 0 0 66%;
+}
+
+.mobile-field {
+    flex: 1;
+}
+
+.programme-note {
+    font-size: 8pt;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+
+/* =========================
+   FEE
+========================= */
+
+.fee-row {
+    margin-left: 45px;
+    display: flex;
+    align-items: baseline;
+    gap: 30px;
+    margin: 10px 0 6px;
+}
+
+.fee-field {
+    display: flex;
+    align-items: baseline;
+    flex: 1;
+}
+
+
+/* =========================
+   SUBJECT HEADING
+========================= */
+
+.subject-heading {
+    margin-top: 8px;
+    margin-bottom: 5px;
+}
+
+
+/* =========================
+   SUBJECT TABLE (single continuous table -
+   theory header/rows, then a second header row
+   for practical, all inside ONE <table> so the
+   grid lines line up exactly like the original)
+========================= */
+
+table.subjects {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 4px 0 4px;
+    page-break-inside: avoid;
+}
+
+table.subjects th,
+table.subjects td {
+    border: 1px solid #000;
+    padding: 4px 5px;
+    font-size: 10pt;
+    line-height: 1.15;
+    vertical-align: middle;
+    text-align: left;
+}
+
+table.subjects th {
+    text-align: center;
+    font-weight: bold;
+}
+
+table.subjects td.center {
+    text-align: center;
+}
+
+.note {
+    font-size: 9pt;
+    margin: 2px 0 0;
+}
+
+
+/* =========================
+   SIGNATURE SECTION - two independent
+   columns, each with its own vertical flow
+========================= */
+
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 26px;
+}
+
+.sig-left,
+.sig-right {
+    width: 46%;
+}
+
+.sig-line-item {
+    margin: 0 0 4px;
+}
+
+.sig-line-item.spaced {
+    margin-top: 34px;
+}
+
+.signature-line {
+    border-top: 1px solid #000;
+    width: 210px;
+    margin: 34px 0 3px;
+}
+
+.sig-right .signature-line:first-child {
+    margin-top: 0;
+}
+
+.sig-caption {
+    text-align: center;
+    width: 260px;
+    white-space: nowrap;
+}
+
+
+/* =========================
+   OFFICE USE
+========================= */
+
+.office-use {
+    margin-top: 22px;
+    border-top: 1px solid #000;
+    padding-top: 6px;
+    page-break-inside: avoid;
+}
+
+.office-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.office-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.office-item {
+    width: 31%;
+    text-align: center;
+}
+
+.office-item .caption {
+    min-height: 18px;
+}
+
+.office-item .line {
+    border-top: 1px solid #000;
+    width: 170px;
+    margin: 26px auto 3px;
+}
+
+.office-item .small-caption {
+    font-size: 10pt;
+}
+
+
+/* Don't split these sections across a page break */
+
+table,
+.signature-section,
+.office-use {
+    page-break-inside: avoid;
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<div class="header">
+
+    <div class="institute">
+        Indian Institute of Engineering Science and Technology, Shibpur
+    </div>
+
+    <div class="form-title">
+        Semester Registration Form for Undergraduate/ Postgraduate Courses
+    </div>
+
+</div>
+
+
+<!-- =========================
+     1. NAME
+========================= -->
+
+<div class="field-line">
+    <span class="field-label">1. Name:</span>
+</div>
+
+<div class="field-line indented">
+    <span class="field-label">(a) (in English)</span>
+    <span class="fill"><%= student.nameEnglish || '' %></span>
+</div>
+
+<div class="field-line indented">
+    <span class="field-label">(b) (in Hindi)</span>
+    <span class="fill"><%= student.nameHindi || '' %></span>
+</div>
+
+
+<!-- =========================
+     2. DEPARTMENT
+========================= -->
+
+<div class="field-line">
+    <span class="field-label">2. Department / School/ Center:</span>
+    <span class="fill"><%= student.department || '' %></span>
+</div>
+
+
+<!-- =========================
+     3 & 4
+========================= -->
+
+<div class="field-line">
+
+    <span class="field-label">3. Programme:</span>
+
+    <span class="fill" style="flex: 0 0 90px;"><%= student.programme || '' %></span>
+
+    <span class="programme-note">
+        (B.Tech./ B.Arch./D.D./ M.Tech./ M.Sc./ MOP/ MBA)
+    </span>
+
+    <span class="field-label">4. Specialization (if any for PG):</span>
+
+    <span class="fill"><%= student.specialization || '' %></span>
+
+</div>
+
+
+<!-- =========================
+     5 & 6
+========================= -->
+
+<div class="inline-group">
+
+    <div class="field-line registration-field">
+        <span class="field-label">5. Registration for:</span>
+        <span class="fill" style="flex: 0 0 90px;"><%= student.semester || '' %></span>
+        <span class="field-label">Semester</span>
+    </div>
+
+    <div class="field-line enrolment-field">
+        <span class="field-label">6. Enrolment No:</span>
+        <span class="fill"><%= student.enrolmentNo || '' %></span>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     7 & 8
+========================= -->
+
+<div class="inline-group">
+
+    <div class="field-line gsuite-field">
+        <span class="field-label">7. G-suite ID:</span>
+        <span class="fill"><%= student.gsuiteId || '' %></span>
+    </div>
+
+    <div class="field-line mobile-field">
+        <span class="field-label">8. Mobile No.:</span>
+        <span class="fill"><%= student.mobileNo || '' %></span>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     9. FEE
+========================= -->
+
+<div class="field-line">
+    <span class="field-label">9. Details of Institute fee payment:</span>
+</div>
+
+<div class="fee-row">
+
+    <div class="fee-field">
+        <span class="field-label">Amount paid: Rs.</span>
+        <span class="fill"><%= fee.amountPaid || '' %></span>
+    </div>
+
+    <div class="fee-field">
+        <span class="field-label">Payment Date:</span>
+        <span class="fill"><%= fee.paymentDate || '' %></span>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     10. SUBJECT DETAILS
+========================= -->
+
+<div class="field-line subject-heading">
+    <span class="field-label">10. Subject details (Including Practical or Laboratory Subject):</span>
+</div>
+
+
+<!-- =========================
+     SINGLE CONTINUOUS TABLE
+     (theory rows, then a practical header
+     row, then practical rows - matches the
+     original's uninterrupted grid)
+========================= -->
+
+<table class="subjects">
+
+    <colgroup>
+        <col style="width:8%">
+        <col style="width:14%">
+        <col style="width:37%">
+        <col style="width:13%">
+        <col style="width:10%">
+        <col style="width:18%">
+    </colgroup>
+
+    <thead>
+        <tr>
+            <th>Sl. No</th>
+            <th>Subject Code</th>
+            <th>Name of the Subject (Theory)</th>
+            <th>Core/Elective</th>
+            <th>Credit</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <%
+        (theorySubjects && theorySubjects.length
+            ? theorySubjects
+            : [{},{},{},{},{},{}]
+        ).forEach(function(sub, i) {
+        %>
+        <tr>
+            <td class="center"><%= i + 1 %>.</td>
+            <td><%= sub.subjectCode || '' %></td>
+            <td><%= sub.subjectName || '' %></td>
+            <td class="center"><%= sub.coreElective || '' %></td>
+            <td class="center"><%= sub.credit || '' %></td>
+            <td><%= sub.remarks || '' %></td>
+        </tr>
+        <% }); %>
+    </tbody>
+
+    <tbody>
+        <tr>
+            <th>Sl. No</th>
+            <th>Subject Code</th>
+            <th colspan="2">Name of the Subject (Practical/ Laboratory/ Sessional)</th>
+            <th>Credit</th>
+            <th>Remarks</th>
+        </tr>
+
+        <%
+        (practicalSubjects && practicalSubjects.length
+            ? practicalSubjects
+            : [{},{},{},{},{}]
+        ).forEach(function(sub, i) {
+        %>
+        <tr>
+            <td class="center"><%= i + 1 %>.</td>
+            <td><%= sub.subjectCode || '' %></td>
+            <td colspan="2"><%= sub.subjectName || '' %></td>
+            <td class="center"><%= sub.credit || '' %></td>
+            <td><%= sub.remarks || '' %></td>
+        </tr>
+        <% }); %>
+    </tbody>
+
+</table>
+
+<div class="note">#may add more rows if necessary</div>
+
+
+<!-- =========================
+     SIGNATURE SECTION
+========================= -->
+
+<div class="signature-section">
+
+    <div class="sig-left">
+        <div class="sig-line-item">Date: <%= student.date || '' %></div>
+        <div class="sig-line-item spaced">Checked by the Department/School/Center/ any other authority</div>
+        <div class="signature-line"></div>
+        <div class="sig-caption">(Signature)</div>
+    </div>
+
+    <div class="sig-right">
+        <div class="signature-line"></div>
+        <div class="sig-caption">Signature of the Student</div>
+        <div class="sig-line-item spaced">Recommended/Not recommended</div>
+        <div class="signature-line"></div>
+        <div class="sig-caption">Head of the Department/School/Center</div>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     OFFICE USE ONLY
+========================= -->
+
+<div class="office-use">
+
+    <div class="office-title">Office use only</div>
+
+    <div class="office-row">
+
+        <div class="office-item">
+            <div class="caption">Scrutinized</div>
+            <div class="line"></div>
+            <div class="small-caption">PIC (Examination)/ AR (Academic)</div>
+        </div>
+
+        <div class="office-item">
+            <div class="caption">Recommended / Not recommended</div>
+            <div class="line"></div>
+            <div class="small-caption">JR (Academic)</div>
+        </div>
+
+        <div class="office-item">
+            <div class="caption">Approved / Not approved</div>
+            <div class="line"></div>
+            <div class="small-caption">Associate Dean (Ac)/Dean (AC)</div>
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

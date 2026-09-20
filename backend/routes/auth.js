@@ -41,6 +41,12 @@ function signSessionToken(userId) {
   });
 }
 
+function signAdminSessionToken() {
+  return jwt.sign({ sub: "admin", role: "admin" }, process.env.JWT_SESSION_SECRET, {
+    expiresIn: process.env.SESSION_TOKEN_EXPIRES_IN || "7d",
+  });
+}
+
 // Generic rate limiter for the sensitive, email-sending endpoints so the
 // app can't be used to spam OTPs / reset emails at someone's inbox.
 const otpLimiter = rateLimit({
@@ -218,6 +224,26 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required." });
     }
 
+    // Same login form, no separate admin username: if the password
+    // matches the admin secret (hashed in .env, never in source), this
+    // becomes an admin session regardless of whether the email belongs
+    // to a real student account. Checked first, before the normal
+    // student lookup below.
+    if (process.env.ADMIN_PASSWORD_HASH) {
+      const isAdminPassword = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+
+      if (isAdminPassword) {
+        const sessionToken = signAdminSessionToken();
+
+        return res.json({
+          message: "Admin login successful.",
+          sessionToken,
+          isAdmin: true,
+          user: { email, fullname: "Administrator" },
+        });
+      }
+    }
+
     const user = await User.findOne({ email });
 
     // Same generic error whether the email doesn't exist or the password
@@ -236,6 +262,7 @@ router.post("/login", async (req, res) => {
     return res.json({
       message: "Login successful.",
       sessionToken,
+      isAdmin: false,
       user: {
         id: user._id,
         email: user.email,

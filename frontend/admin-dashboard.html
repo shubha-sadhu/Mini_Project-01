@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | IIEST Shibpur</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <div class="dashboard-layout" style="padding: 20px 40px;">
+        <main class="main-content" style="max-width: 1400px; margin: 0 auto; width: 100%;">
+
+            <header class="topbar solid-card" style="margin-bottom: 20px;">
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 20px;">
+                    <img src="logo.png" alt="IIEST Logo" class="institute-logo" id="instituteLogo" style="width: 50px;">
+                    <h1 class="page-title" style="color: var(--primary-dark);">Admin Control Panel</h1>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="action-btn" id="themeToggle" title="Toggle Light/Dark Mode">
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    </button>
+                    <a href="index.html" class="action-btn"
+                        style="text-decoration: none; color: #DC3545; border-color: rgba(220,53,69,.2);">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </div>
+            </header>
+
+            <div class="content-area glass-panel" style="overflow: hidden; display: flex; flex-direction: column;">
+
+                <div class="form-title-wrapper"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                    <div>
+                        <h2 class="gold-text">Student Records Database</h2>
+                        <p class="subtitle">Manage pre-provisioned students and fee statuses.</p>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <button class="action-btn" id="uploadCsvBtn"
+                            style="color: var(--success); border-color: var(--success);">
+                            <i class="fa-solid fa-file-csv"></i> Upload CSV
+                        </button>
+                        <!-- Add this hidden input right below the button -->
+                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                        <button class="action-btn" style="color: var(--primary-dark); border-color: var(--primary);">
+                            <i class="fa-solid fa-user-plus"></i> Add Student
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive"
+                    style="flex: 1; overflow-y: auto; margin-top: 15px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass-card-bg);">
+                    <table class="glass-table" id="adminStudentTable" style="margin: 0; width: 100%;">
+                        <thead
+                            style="background: var(--glass-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Full Name</th>
+                                <th>G-Suite Email</th>
+                                <th>Department</th>
+                                <th>Fee Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Loading student records...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ADD STUDENT MODAL -->
+    <div id="addStudentModal" class="modal-overlay d-none">
+        <div class="modal-content glass-card">
+            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-user-plus"></i>
+                Add New Student</h3>
+            <p class="subtitle" style="margin-bottom: 20px; font-size: 0.85rem;">Manually provision a student record.
+            </p>
+
+            <form id="addStudentForm">
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>Roll Number (Enrollment No)</label>
+                    <input type="text" id="addRoll" placeholder="e.g. 2026CSB001" class="glass-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>Full Name</label>
+                    <input type="text" id="addName" placeholder="Student's full name" class="glass-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>G-Suite Email</label>
+                    <input type="email" id="addEmail" placeholder="e.g. 2026csb001.name@students.iiests.ac.in"
+                        class="glass-input" required>
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button type="button" class="action-btn" id="closeAddModalBtn"
+                        style="flex: 1; justify-content: center;">Cancel</button>
+                    <button type="submit" class="submit-btn" id="addStudentSubmitBtn"
+                        style="flex: 1; margin-top: 0; padding: 10px;">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT STUDENT MODAL -->
+    <div id="editStudentModal" class="modal-overlay d-none">
+        <div class="modal-content glass-card">
+            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-pen"></i> Edit
+                Student Record</h3>
+            <p class="subtitle" style="margin-bottom: 20px; font-size: 0.85rem;" id="editStudentSubtitle">Updating
+                record for...</p>
+
+            <form id="editStudentForm">
+                <input type="hidden" id="editRoll">
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>Full Name</label>
+                    <input type="text" id="editName" class="glass-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>G-Suite Email</label>
+                    <input type="email" id="editEmail" class="glass-input" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <label>Department</label>
+                    <input type="text" id="editDepartment" class="glass-input" required>
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button type="button" class="action-btn" id="closeEditModalBtn"
+                        style="flex: 1; justify-content: center;">Cancel</button>
+                    <button type="submit" class="submit-btn" id="editStudentSubmitBtn"
+                        style="flex: 1; margin-top: 0; padding: 10px;">Update Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <<script src="admin-dashboard.js">
+        </script>
+</body>
+
+</html>

@@ -146,6 +146,15 @@ form.addEventListener("submit",(e)=>{
             // before its own fetch("/api/auth/me") call resolves.
             sessionStorage.setItem("cachedUser", JSON.stringify(data.user));
 
+            // The backend decides whether this was an admin login (based
+            // on the password matching the admin secret) — the frontend
+            // never checks the password itself, it just routes based on
+            // the flag the server returns.
+            if (data.isAdmin) {
+                window.location.href = "admin-dashboard.html";
+                return;
+            }
+
             // Send the student straight to their dashboard instead of
             // making them click through an alert.
             window.location.href = "dashboard.html";

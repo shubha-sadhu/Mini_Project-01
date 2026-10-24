@@ -1,11 +1,13 @@
+
 const pool = require("../config/postgres");
 
 /*
- * Adds a student, or updates them if the enrolment number already exists.
+ * Adds a student, or updates them if the enrollment number already exists.
  *
- * When updating, a blank Hindi name / mobile / semester does NOT wipe what is
- * already stored. `semester` is the value given by the admin (may be null);
- * `default_semester` is only used when a brand-new row has no semester.
+ * If PostgreSQL generates a duplicate user_id because the identity sequence
+ * is behind the existing records, synchronize the sequence and retry once.
+ *
+ * No table schema or student records are changed by the sequence correction.
  */
 const insertStudent = async (student, client = pool) => {
     const query = `
@@ -35,17 +37,39 @@ const insertStudent = async (student, client = pool) => {
         student.default_semester
     ];
 
-    const result = await client.query(query, values);
+    try {
+        const result = await client.query(query, values);
+        return result.rows[0];
+    } catch (err) {
+        // Recover only from a duplicate generated primary key.
+        if (
+            err.code !== "23505" ||
+            err.constraint !== "students_pkey"
+        ) {
+            throw err;
+        }
 
-    return result.rows[0];
+        // Synchronize the identity sequence with existing student IDs.
+        await client.query(`
+            SELECT setval(
+                pg_get_serial_sequence('public.students', 'user_id'),
+                COALESCE((SELECT MAX(user_id) FROM public.students), 1),
+                EXISTS (SELECT 1 FROM public.students)
+            );
+        `);
+
+        // Retry the original insert once.
+        const result = await client.query(query, values);
+        return result.rows[0];
+    }
 };
 
 const getAllStudents = async (client = pool) => {
-    const result = await client.query(
-        `SELECT enrollment_id, name_english, name_hindi, mobile, semester
-           FROM students
-          ORDER BY enrollment_id`
-    );
+    const result = await client.query(`
+        SELECT enrollment_id, name_english, name_hindi, mobile, semester
+        FROM students
+        ORDER BY enrollment_id
+    `);
 
     return result.rows;
 };

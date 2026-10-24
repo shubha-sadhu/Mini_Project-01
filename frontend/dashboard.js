@@ -610,6 +610,27 @@ const pdfNavItem = document.querySelector(
 const pdfViewer = document.getElementById("pdfViewer");
 const pdfLoading = document.getElementById("pdfLoading");
 const pdfError = document.getElementById("pdfError");
+const pdfBlocker = document.getElementById("pdfBlocker");
+
+// Stop keyboard use (Tab, Enter, etc.) while the request is running
+function blockKeys(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function lockScreen() {
+    pdfBlocker.classList.remove("d-none");
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", blockKeys, true);
+}
+
+function unlockScreen() {
+    pdfBlocker.classList.add("d-none");
+    document.body.style.overflow = "";
+    document.removeEventListener("keydown", blockKeys, true);
+}
+
+let pdfRequestInProgress = false;
 
 if (pdfNavItem) {
     pdfNavItem.addEventListener("click", async () => {
@@ -619,9 +640,16 @@ if (pdfNavItem) {
             return;
         }
 
-        pdfLoading.classList.remove("d-none");
+        if (pdfRequestInProgress) return;   // ignore repeat clicks
+        pdfRequestInProgress = true;
+
+        lockScreen();
         pdfError.classList.add("d-none");
         pdfViewer.removeAttribute("src");
+
+        // Give up after 60 seconds so the user is never locked out forever
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
 
         try {
             const response = await fetch(
@@ -630,7 +658,8 @@ if (pdfNavItem) {
                     method: "POST",
                     headers: {
                         Authorization: `Bearer ${sessionToken}`
-                    }
+                    },
+                    signal: controller.signal
                 }
             );
 
@@ -645,8 +674,13 @@ if (pdfNavItem) {
 
             const pdfBlob = await response.blob();
 
-            const pdfUrl = URL.createObjectURL(pdfBlob);
+            // Free the previous blob URL so memory doesn't pile up
+            if (pdfViewer.dataset.blobUrl) {
+                URL.revokeObjectURL(pdfViewer.dataset.blobUrl);
+            }
 
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            pdfViewer.dataset.blobUrl = pdfUrl;
             pdfViewer.src = pdfUrl;
 
         } catch (error) {
@@ -654,12 +688,16 @@ if (pdfNavItem) {
             console.error("PDF generation error:", error);
 
             pdfError.textContent =
-                error.message || "Could not generate PDF.";
+                error.name === "AbortError"
+                    ? "The server took too long to respond. Please try again."
+                    : (error.message || "Could not generate PDF.");
 
             pdfError.classList.remove("d-none");
 
         } finally {
-            pdfLoading.classList.add("d-none");
+            clearTimeout(timeoutId);
+            pdfRequestInProgress = false;
+            unlockScreen();                 // always runs, even on error
         }
     });
 }

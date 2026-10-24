@@ -10,6 +10,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* Full-screen blocker shown while the PDF is being generated */
+        #pdfBlocker {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: wait;
+        }
+        #pdfBlocker.d-none { display: none; }
+        .pdf-blocker-box { text-align: center; color: #fff; font-family: "Poppins", sans-serif; }
+        .pdf-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            border: 4px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #d4af37;
+            border-radius: 50%;
+            animation: pdfSpin 0.9s linear infinite;
+        }
+        @keyframes pdfSpin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
@@ -474,6 +499,14 @@
                     <button type="submit" class="submit-btn" style="flex: 1; margin-top: 0; padding: 10px;">Verify</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- PDF generation blocker -->
+    <div id="pdfBlocker" class="d-none" aria-live="polite" role="alert">
+        <div class="pdf-blocker-box">
+            <div class="pdf-spinner"></div>
+            <p>Generating PDF, please wait...</p>
         </div>
     </div>
 

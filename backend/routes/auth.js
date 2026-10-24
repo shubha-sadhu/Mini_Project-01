@@ -389,7 +389,7 @@ router.post("/forgot-password", otpLimiter, async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).select("-passwordHash");
 
     if (!user) {
       return res.status(404).json({ error: "User not found." });
@@ -399,6 +399,54 @@ router.get("/me", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("me error:", err);
     return res.status(500).json({ error: "Could not load your profile right now." });
+  }
+});
+
+/* ==============================
+      CHANGE PASSWORD (LOGGED IN)
+============================== */
+
+router.put("/change-password", requireAuth, async (req, res) => {
+  try {
+    // The admin session has no database record, so there is nothing to update.
+    if (req.user && req.user.role === "admin") {
+      return res.status(403).json({ error: "The admin password cannot be changed from here." });
+    }
+
+    const currentPassword = String(req.body.currentPassword || "");
+    const newPassword = String(req.body.newPassword || "");
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current and new password are required." });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "New password must be at least 8 characters long." });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ error: "New password must be different from your current password." });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      // 400 (not 401) so the frontend doesn't treat this as an expired session.
+      return res.status(400).json({ error: "Current password is incorrect." });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.mustChangePassword = false;
+    await user.save();
+
+    return res.json({ message: "Password updated successfully." });
+  } catch (err) {
+    console.error("change-password error:", err);
+    return res.status(500).json({ error: "Could not update your password right now. Please try again." });
   }
 });
 

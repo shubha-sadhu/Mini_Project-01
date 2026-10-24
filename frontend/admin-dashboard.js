@@ -1,7 +1,4 @@
-/*==================================================
-        ADMIN DASHBOARD - JS ENGINE
-==================================================*/
-
+/*ADMIN DASHBOARD - JS ENGINE*/
 const API_BASE = "http://localhost:5000/api";
 const sessionToken = sessionStorage.getItem("sessionToken");
 
@@ -16,9 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupEditModal(); // <-- New Edit logic initialized
 });
 
-/*==================================================
-        FETCH & RENDER STUDENT DATA
-==================================================*/
+/*FETCH & RENDER STUDENT DATA*/
 async function fetchStudents() {
     const tbody = document.getElementById("adminTableBody");
     try {
@@ -67,9 +62,7 @@ function renderTable(students, tbody) {
     }).join("");
 }
 
-/*==================================================
-        INTERACTIVE CRUD ACTIONS
-==================================================*/
+/*INTERACTIVE CRUD ACTIONS*/
 window.toggleFeeStatus = async function(enrollmentNo, currentStatus) {
     const newStatus = !currentStatus;
     try {
@@ -99,9 +92,7 @@ window.deleteStudent = async function(enrollmentNo) {
     }
 };
 
-/*==================================================
-        ADD NEW STUDENT MODAL
-==================================================*/
+/*ADD NEW STUDENT MODAL*/
 function setupAddModal() {
     const addModal = document.getElementById("addStudentModal");
     const openBtn = document.querySelector('button[title="Add Student"]') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Add Student'));
@@ -147,9 +138,7 @@ function setupAddModal() {
     });
 }
 
-/*==================================================
-        EDIT STUDENT MODAL
-==================================================*/
+/*EDIT STUDENT MODAL*/
 window.openEditModal = function(roll, name, email, department) {
     document.getElementById('editRoll').value = roll;
     document.getElementById('editName').value = name;
@@ -202,9 +191,7 @@ function setupEditModal() {
     });
 }
 
-/*==================================================
-        THEME TOGGLE
-==================================================*/
+/*THEME TOGGLE*/
 function setupThemeToggle() {
     const themeToggleBtn = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
@@ -228,9 +215,7 @@ function setupThemeToggle() {
     });
 }
 
-/*==================================================
-        CSV BULK UPLOAD LOGIC
-==================================================*/
+/* CSV BULK UPLOAD LOGIC*/
 const uploadCsvBtn = document.getElementById("uploadCsvBtn");
 const csvFileInput = document.getElementById("csvFileInput");
 

@@ -140,13 +140,11 @@
                                 </div>
                                 <div class="input-group">
                                     <label>1(b). Name (in Hindi)</label>
-                                    <div style="display:flex; gap:8px; align-items:stretch;">
-                                        <input type="text" id="regNameHindi" placeholder="Type name in English, then click अ" class="glass-input">
-                                        <button type="button" id="transliterateNameBtn" class="action-btn" style="flex-shrink:0; padding:10px 14px;" title="Convert typed English letters to Hindi">अ</button>
+                                    <div class="hindi-field">
+                                        <input type="text" id="regNameHindi" placeholder="Tap the keyboard icon to type in Hindi" class="glass-input hindi-input" inputmode="none" autocomplete="off" maxlength="100" lang="hi">
+                                        <button type="button" class="action-btn hindi-kb-toggle" data-target="regNameHindi" title="Open Hindi keyboard" aria-label="Open Hindi keyboard"><i class="fa-regular fa-keyboard"></i></button>
                                     </div>
-                                    <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">
-                                        Type your name phonetically in English (e.g. "priya", "raahul") then click <strong>अ</strong>. Use "aa" for a long आ sound, e.g. "raahul" → राहुल.
-                                    </p>
+                                    <p class="hindi-hint">Use the on-screen Hindi keyboard to enter your name. Only Hindi (Devanagari) characters are accepted.</p>
                                 </div>
                                 <div class="input-group">
                                     <label>2. Department</label>
@@ -321,13 +319,11 @@
                                         </div>
                                         <div class="input-group">
                                             <label>Name (in Hindi)</label>
-                                            <div style="display:flex; gap:8px; align-items:stretch;">
-                                                <input type="text" id="profileNameHindi" placeholder="Type name in English, then click अ" class="glass-input">
-                                                <button type="button" id="transliterateProfileNameBtn" class="action-btn" style="flex-shrink:0; padding:10px 14px;" title="Convert typed English letters to Hindi">अ</button>
-                                            </div>
-                                            <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">
-                                                Type phonetically (e.g. "priya", "raahul") then click <strong>अ</strong>. Use "aa" for a long आ sound.
-                                            </p>
+                                            <div class="hindi-field">
+                                        <input type="text" id="profileNameHindi" placeholder="Tap the keyboard icon to type in Hindi" class="glass-input hindi-input" inputmode="none" autocomplete="off" maxlength="100" lang="hi">
+                                        <button type="button" class="action-btn hindi-kb-toggle" data-target="profileNameHindi" title="Open Hindi keyboard" aria-label="Open Hindi keyboard"><i class="fa-regular fa-keyboard"></i></button>
+                                    </div>
+                                    <p class="hindi-hint">Use the on-screen Hindi keyboard to enter your name. Only Hindi (Devanagari) characters are accepted.</p>
                                         </div>
                                         <div class="input-group">
                                             <label>Enrolment No.</label>
@@ -373,7 +369,7 @@
                                         <div class="input-group">
                                             <label>Current Password</label>
                                             <div class="password-wrapper">
-                                                <input type="password" placeholder="Enter current password" class="glass-input" required>
+                                                <input type="password" id="currentPass" placeholder="Enter current password" class="glass-input" required>
                                                 <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
                                             </div>
                                         </div>

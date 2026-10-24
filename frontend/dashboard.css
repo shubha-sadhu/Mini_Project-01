@@ -614,3 +614,47 @@ select:disabled {
 .pdf-message.d-none {
     display: none;
 }
+
+/*==================================================
+        HINDI VIRTUAL KEYBOARD
+==================================================*/
+.hindi-field { display: flex; gap: 8px; align-items: stretch; }
+.hindi-field .glass-input { flex: 1; min-width: 0; font-size: 1.05rem; }
+.hindi-kb-toggle { flex-shrink: 0; padding: 10px 14px; }
+.hindi-kb-toggle.active { border-color: var(--primary); color: var(--primary); }
+.hindi-hint { font-size: 0.78rem; color: var(--text-muted); margin: 4px 0 0; }
+
+.hindi-keyboard {
+    margin-top: 10px;
+    padding: 12px;
+    background: var(--glass-card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+.hk-title {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin: 10px 0 6px;
+}
+.hk-title:first-child { margin-top: 0; }
+.hk-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; }
+.hk-key {
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--glass-border);
+    background: var(--input-bg);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.hk-key:hover { background: var(--hover-bg); border-color: var(--primary); }
+.hk-key:active { transform: scale(0.94); }
+.hk-key .hk-dotted { color: var(--text-muted); }
+.hk-actions { display: flex; gap: 6px; margin-top: 12px; }
+.hk-actions .hk-key { flex: 1; font-size: 0.85rem; }
+.hk-actions .hk-key.hk-space { flex: 3; }
+.hk-actions .hk-key.hk-done { background: var(--primary); border-color: var(--primary); color: #111; font-weight: 600; }

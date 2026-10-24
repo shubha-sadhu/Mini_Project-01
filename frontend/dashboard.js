@@ -487,29 +487,81 @@ if (contactForm) {
         SECURITY FORM (VERIFY TO SAVE)
 ==================================================*/
 const securityForm = document.getElementById('securityForm');
-if(securityForm) {
-    securityForm.addEventListener('submit', (e) => {
+if (securityForm) {
+    securityForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        const currentPass = document.getElementById('currentPass').value;
         const newPass = document.getElementById('newPass').value;
         const confirmPass = document.getElementById('confirmPass').value;
-        
+        const submitBtn = securityForm.querySelector('button[type="submit"]');
+
         if (newPass !== confirmPass) {
             alert("Your new passwords do not match. Please try again.");
             return;
         }
-        
-        triggerVerificationFlow(() => {
-            alert("Password updated securely!");
+        if (newPass.length < 8) {
+            alert("New password must be at least 8 characters long.");
+            return;
+        }
+        if (newPass === currentPass) {
+            alert("New password must be different from your current password.");
+            return;
+        }
+
+        const originalBtnHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+
+        try {
+            const res = await fetch(`${API_BASE}/change-password`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${sessionToken}`,
+                },
+                body: JSON.stringify({
+                    currentPassword: currentPass,
+                    newPassword: newPass,
+                }),
+            });
+
+            let data = {};
+            try { data = await res.json(); } catch (_) { /* non-JSON response */ }
+
+            if (res.status === 401) {
+                // Session expired / invalid token
+                alert("Your session has expired. Please log in again.");
+                sessionStorage.removeItem("sessionToken");
+                sessionStorage.removeItem("cachedUser");
+                window.location.href = "../login/index.html";
+                return;
+            }
+
+            if (!res.ok) {
+                alert(data.error || data.message || "Could not update password. Please try again.");
+                return;
+            }
+
+            alert("Password updated successfully!");
             securityForm.reset();
-            
-            // Re-hide passwords after submit reset
-            const icons = securityForm.querySelectorAll('.toggle-password');
-            icons.forEach(icon => {
+
+            // Re-hide passwords after reset
+            securityForm.querySelectorAll('.toggle-password').forEach(icon => {
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
                 icon.title = "Show Password";
             });
-        });
+            securityForm.querySelectorAll('input').forEach(inp => {
+                if (inp.type === 'text') inp.type = 'password';
+            });
+        } catch (err) {
+            console.error("Password update failed:", err);
+            alert("Could not reach the server. Make sure the backend is running.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+        }
     });
 }
 
@@ -610,202 +662,174 @@ if (pdfNavItem) {
             pdfLoading.classList.add("d-none");
         }
     });
-}/*==================================================
-        DEVANAGARI TRANSLITERATION ENGINE
-        Phonetic English -> Hindi, for the "Name in Hindi"
-        field. Greedy longest-match tokenizer + consonant/vowel
-        renderer, with a "final short a = long aa" heuristic
-        since that's how most Indian names are romanized in
-        casual typing (e.g. typing "priya" is meant to end in
-        the long आ sound, not the short अ).
-
-        Limitations (inherent to phonetic-only transliteration,
-        not fixable without a name dictionary):
-        - Mid-word long vowels still need to be typed doubled
-          ("raahul" -> राहुल, not "rahul" -> रहुल).
-        - A handful of names are conventionally spelled in Hindi
-          in ways that don't follow strict phonetic rules (e.g.
-          some surnames). The output is always a normal editable
-          text field, so it can be hand-corrected afterward.
-==================================================*/
-// Devanagari transliteration engine — phonetic English -> Hindi.
-// Greedy longest-match tokenizer + consonant/vowel renderer, with a
-// "final short a = long aa" heuristic since that's how virtually all
-// Indian names are romanized in casual typing (e.g. "priya" is meant
-// to end in the long आ sound, not the short अ).
-
-const VOWELS_INDEPENDENT = {
-  "aa": "आ", "ai": "ऐ", "au": "औ",
-  "ii": "ई", "ee": "ई",
-  "uu": "ऊ", "oo": "ऊ",
-  "a": "अ", "i": "इ", "u": "उ", "e": "ए", "o": "ओ",
-};
-
-const VOWELS_MATRA = {
-  "aa": "ा", "ai": "ै", "au": "ौ",
-  "ii": "ी", "ee": "ी",
-  "uu": "ू", "oo": "ू",
-  "a": "", "i": "ि", "u": "ु", "e": "े", "o": "ो",
-};
-
-// Special multi-letter consonant clusters that must map to a specific
-// conjunct glyph rather than being built generically (generic joining
-// would use the wrong base letters, e.g. "ksh" must use ष not श).
-const CONSONANTS_SPECIAL = {
-  "ksh": "क्ष", "gy": "ज्ञ", "jn": "ज्ञ",
-};
-
-const CONSONANTS = {
-  "kh": "ख", "gh": "घ", "chh": "छ", "ch": "च", "jh": "झ",
-  "th": "थ", "dh": "ध", "ph": "फ", "bh": "भ", "sh": "श",
-  "k": "क", "g": "ग", "j": "ज", "t": "त", "d": "द", "n": "न",
-  "p": "प", "b": "ब", "m": "म", "y": "य", "r": "र", "l": "ल",
-  "v": "व", "w": "व", "s": "स", "h": "ह", "f": "फ",
-};
-
-// Longest-match-first token list (3-letter, then 2-letter, then 1-letter).
-const ALL_TOKENS = [
-  ...Object.keys(CONSONANTS_SPECIAL),
-  ...Object.keys(VOWELS_INDEPENDENT),
-  ...Object.keys(CONSONANTS),
-].sort((a, b) => b.length - a.length);
-
-const HALANT = "्";
-
-function tokenize(word) {
-  const tokens = [];
-  let i = 0;
-  const lower = word.toLowerCase();
-
-  while (i < lower.length) {
-    let matched = null;
-
-    for (const t of ALL_TOKENS) {
-      if (lower.startsWith(t, i)) {
-        matched = t;
-        break;
-      }
-    }
-
-    if (matched) {
-      const isVowel = matched in VOWELS_INDEPENDENT;
-      tokens.push({ text: matched, isVowel });
-      i += matched.length;
-    } else {
-      // Not a recognized letter (space, punctuation, digit) — pass through.
-      tokens.push({ text: lower[i], isVowel: false, literal: true });
-      i += 1;
-    }
-  }
-
-  return tokens;
 }
-
-function transliterateWord(word) {
-  const tokens = tokenize(word);
-  let output = "";
-  let pendingConsonantBase = null; // Devanagari base char(s) awaiting a vowel
-
-  // Index of the last non-literal token, so we know which vowel is "final".
-  let lastRealIndex = -1;
-  tokens.forEach((tok, idx) => { if (!tok.literal) lastRealIndex = idx; });
-
-  tokens.forEach((tok, idx) => {
-    if (tok.literal) {
-      if (pendingConsonantBase) {
-        output += pendingConsonantBase;
-        pendingConsonantBase = null;
-      }
-      output += tok.text;
-      return;
-    }
-
-    if (tok.isVowel) {
-      const isFinal = idx === lastRealIndex;
-      if (pendingConsonantBase) {
-        let matra = VOWELS_MATRA[tok.text];
-        // Heuristic: a trailing short "a" at the very end of the word is
-        // almost always meant as the long आ sound in casual romanization
-        // (e.g. "priya" -> प्रिया, not प्रिय).
-        if (isFinal && tok.text === "a") matra = VOWELS_MATRA["aa"];
-        output += pendingConsonantBase + matra;
-        pendingConsonantBase = null;
-      } else {
-        let indep = VOWELS_INDEPENDENT[tok.text];
-        if (isFinal && tok.text === "a" && idx !== 0) {
-          // final independent "a" (rare, no preceding consonant) - still
-          // prefer the long form for consistency with the heuristic above.
-          indep = VOWELS_INDEPENDENT["aa"];
-        }
-        output += indep;
-      }
-    } else {
-      // Consonant
-      const base = CONSONANTS_SPECIAL[tok.text] || CONSONANTS[tok.text];
-      if (pendingConsonantBase) {
-        output += pendingConsonantBase + HALANT;
-      }
-      pendingConsonantBase = base;
-    }
-  });
-
-  if (pendingConsonantBase) {
-    output += pendingConsonantBase;
-  }
-
-  return output;
-}
-
-function transliterateToHindi(text) {
-  // Split on whitespace, transliterate each word, rejoin with the
-  // original spacing preserved.
-  return text
-    .split(/(\s+)/)
-    .map(part => (/\s+/.test(part) ? part : transliterateWord(part)))
-    .join("");
-}
-
 
 /*==================================================
-        HINDI NAME TRANSLITERATION
-        (Registration Form, field 1(b))
+        HINDI VIRTUAL KEYBOARD
+        On-screen Devanagari keyboard for the "Name (in Hindi)"
+        fields (Registration Form + Settings). One shared keyboard
+        is attached to whichever field's keyboard button is clicked.
+        Fields only accept Devanagari characters and spaces, so
+        English letters from a physical keyboard are ignored.
 ==================================================*/
-const regNameHindiInput = document.getElementById("regNameHindi");
-const transliterateBtn = document.getElementById("transliterateNameBtn");
+const HINDI_KB_LAYOUT = [
+    { title: "Vowels (स्वर)", keys: ["अ", "आ", "इ", "ई", "उ", "ऊ", "ऋ", "ए", "ऐ", "ओ", "औ", "अं", "अः"] },
+    { title: "Vowel signs (मात्राएँ)", matra: true, keys: ["ा", "ि", "ी", "ु", "ू", "ृ", "े", "ै", "ो", "ौ", "ं", "ः", "ँ", "्"] },
+    { title: "Consonants (व्यंजन)", keys: [
+        "क", "ख", "ग", "घ", "ङ", "च", "छ", "ज", "झ", "ञ",
+        "ट", "ठ", "ड", "ढ", "ण", "त", "थ", "द", "ध", "न",
+        "प", "फ", "ब", "भ", "म", "य", "र", "ल", "व", "ळ",
+        "श", "ष", "स", "ह"
+    ] },
+    { title: "Conjuncts & nukta", keys: ["क्ष", "त्र", "ज्ञ", "श्र", "ड़", "ढ़"] }
+];
 
-function convertHindiField() {
-    if (!regNameHindiInput) return;
-    const raw = regNameHindiInput.value;
-    if (!raw.trim()) return;
-    regNameHindiInput.value = transliterateToHindi(raw);
+const HINDI_ONLY_REGEX = /[^\u0900-\u097F\u200C\u200D ]/g;
+
+let hindiKbEl = null;
+let hindiKbTarget = null;
+let hindiKbBtn = null;
+
+function hindiKbInsert(text) {
+    const input = hindiKbTarget;
+    if (!input) return;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const next = input.value.slice(0, start) + text + input.value.slice(end);
+    if (input.maxLength > 0 && next.length > input.maxLength) return;
+    input.value = next;
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(start + text.length, start + text.length);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-if (transliterateBtn) {
-    transliterateBtn.addEventListener("click", convertHindiField);
+function hindiKbBackspace() {
+    const input = hindiKbTarget;
+    if (!input) return;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    let from = start;
+    if (start === end) {
+        if (start === 0) return;
+        from = start - 1;
+    }
+    input.value = input.value.slice(0, from) + input.value.slice(end);
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(from, from);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-// Convenience: also convert automatically when the user leaves the
-// field (e.g. tabs to the next one), so clicking the button is a
-// nice-to-have rather than mandatory.
-if (regNameHindiInput) {
-    regNameHindiInput.addEventListener("blur", convertHindiField);
+function buildHindiKeyboard() {
+    const kb = document.createElement("div");
+    kb.className = "hindi-keyboard";
+    kb.setAttribute("role", "group");
+    kb.setAttribute("aria-label", "Hindi keyboard");
+
+    HINDI_KB_LAYOUT.forEach(section => {
+        const title = document.createElement("div");
+        title.className = "hk-title";
+        title.textContent = section.title;
+        kb.appendChild(title);
+
+        const row = document.createElement("div");
+        row.className = "hk-row";
+        section.keys.forEach(key => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "hk-key";
+            btn.dataset.insert = key;
+            if (section.matra) {
+                btn.innerHTML = '<span class="hk-dotted">◌</span>' + key;
+            } else {
+                btn.textContent = key;
+            }
+            row.appendChild(btn);
+        });
+        kb.appendChild(row);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "hk-actions";
+    actions.innerHTML =
+        '<button type="button" class="hk-key hk-space" data-action="space">Space</button>' +
+        '<button type="button" class="hk-key" data-action="backspace" title="Backspace">⌫</button>' +
+        '<button type="button" class="hk-key" data-action="clear">Clear</button>' +
+        '<button type="button" class="hk-key hk-done" data-action="close">Done</button>';
+    kb.appendChild(actions);
+
+    // Keep the caret in the text field while keys are pressed.
+    kb.addEventListener("mousedown", e => e.preventDefault());
+
+    kb.addEventListener("click", e => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        if (btn.dataset.insert) {
+            hindiKbInsert(btn.dataset.insert);
+        } else if (btn.dataset.action === "space") {
+            hindiKbInsert(" ");
+        } else if (btn.dataset.action === "backspace") {
+            hindiKbBackspace();
+        } else if (btn.dataset.action === "clear") {
+            if (hindiKbTarget) {
+                hindiKbTarget.value = "";
+                hindiKbTarget.dispatchEvent(new Event("input", { bubbles: true }));
+                hindiKbTarget.focus({ preventScroll: true });
+            }
+        } else if (btn.dataset.action === "close") {
+            closeHindiKeyboard();
+        }
+    });
+
+    return kb;
 }
 
-// Same engine, second field: Settings -> Profile Details -> Name (in Hindi).
-const profileNameHindiInput = document.getElementById("profileNameHindi");
-const transliterateProfileBtn = document.getElementById("transliterateProfileNameBtn");
-
-function convertProfileHindiField() {
-    if (!profileNameHindiInput) return;
-    const raw = profileNameHindiInput.value;
-    if (!raw.trim()) return;
-    profileNameHindiInput.value = transliterateToHindi(raw);
+function closeHindiKeyboard() {
+    if (hindiKbEl && hindiKbEl.parentNode) hindiKbEl.parentNode.removeChild(hindiKbEl);
+    if (hindiKbBtn) hindiKbBtn.classList.remove("active");
+    hindiKbTarget = null;
+    hindiKbBtn = null;
 }
 
-if (transliterateProfileBtn) {
-    transliterateProfileBtn.addEventListener("click", convertProfileHindiField);
+function openHindiKeyboard(input, btn) {
+    closeHindiKeyboard();
+    if (!hindiKbEl) hindiKbEl = buildHindiKeyboard();
+    input.closest(".input-group").appendChild(hindiKbEl);
+    hindiKbTarget = input;
+    hindiKbBtn = btn;
+    btn.classList.add("active");
+    input.focus({ preventScroll: true });
 }
 
-if (profileNameHindiInput) {
-    profileNameHindiInput.addEventListener("blur", convertProfileHindiField);
-}
+document.querySelectorAll(".hindi-kb-toggle").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.target);
+        if (!input) return;
+        if (hindiKbTarget === input) {
+            closeHindiKeyboard();
+        } else {
+            openHindiKeyboard(input, btn);
+        }
+    });
+});
+
+// Accept Devanagari only (also covers a Hindi IME / pasted text).
+document.querySelectorAll(".hindi-input").forEach(input => {
+    input.addEventListener("input", () => {
+        const cleaned = input.value.replace(HINDI_ONLY_REGEX, "");
+        if (cleaned !== input.value) {
+            const pos = (input.selectionStart ?? cleaned.length) - (input.value.length - cleaned.length);
+            input.value = cleaned;
+            input.setSelectionRange(Math.max(pos, 0), Math.max(pos, 0));
+        }
+    });
+});
+
+// Close when clicking elsewhere or pressing Escape.
+document.addEventListener("click", e => {
+    if (!hindiKbTarget) return;
+    if (hindiKbEl.contains(e.target) || e.target.closest(".hindi-field")) return;
+    closeHindiKeyboard();
+});
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && hindiKbTarget) closeHindiKeyboard();
+});

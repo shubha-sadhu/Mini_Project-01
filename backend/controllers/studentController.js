@@ -16,24 +16,52 @@ const openElectiveService = require("../services/openElectiveService");
 const VALID_COURSE_CODES = ["CSB", "CSM", "CSP", "ITB", "ITM", "ITP"];
 
 const PROGRAMME_DETAILS = {
-  CSB: { department: "Computer Science & Technology", programme: "B.Tech.", specialization: "" },
-  CSM: { department: "Computer Science & Technology", programme: "M.Tech.", specialization: "" },
-  CSP: { department: "Computer Science & Technology", programme: "Ph.D.", specialization: "" },
-  ITB: { department: "Information Technology", programme: "B.Tech", specialization: "" },
-  ITM: { department: "Information Technology", programme: "M.Tech", specialization: "" },
-  ITP: { department: "Information Technology", programme: "Ph.D", specialization: "" },
+  CSB: {
+    department: "Computer Science & Technology",
+    programme: "B.Tech.",
+    specialization: "",
+  },
+  CSM: {
+    department: "Computer Science & Technology",
+    programme: "M.Tech.",
+    specialization: "",
+  },
+  CSP: {
+    department: "Computer Science & Technology",
+    programme: "Ph.D.",
+    specialization: "",
+  },
+  ITB: {
+    department: "Information Technology",
+    programme: "B.Tech",
+    specialization: "",
+  },
+  ITM: {
+    department: "Information Technology",
+    programme: "M.Tech",
+    specialization: "",
+  },
+  ITP: {
+    department: "Information Technology",
+    programme: "Ph.D",
+    specialization: "",
+  },
 };
 
 /*
  * Which student is logged in? Uses an explicit enrolment id on the user if
  * there is one, otherwise the part of the G-suite address before the first dot:
- *   2025csb120.aryan@students.iiests.ac.in  ->  2025CSB120
+ *   2025csb120.aryan@students.iiests.ac.in -> 2025CSB120
  */
 function getEnrollmentId(user) {
   const explicit = user.enrollmentId || user.enrollment_id;
-  if (explicit) return String(explicit).trim().toUpperCase();
+
+  if (explicit) {
+    return String(explicit).trim().toUpperCase();
+  }
 
   const localPart = String(user.email || "").split("@")[0];
+
   return localPart.split(/[._]/)[0].trim().toUpperCase();
 }
 
@@ -42,28 +70,40 @@ function parseEnrollmentId(enrollmentId) {
   const enrollmentYear = Number(enrollmentId.substring(0, 4));
   const courseCode = enrollmentId.substring(4, 7).toUpperCase();
 
-  if (!Number.isInteger(enrollmentYear) || !VALID_COURSE_CODES.includes(courseCode)) {
+  if (
+    !Number.isInteger(enrollmentYear) ||
+    !VALID_COURSE_CODES.includes(courseCode)
+  ) {
     return null;
   }
+
   return { enrollmentYear, courseCode };
 }
 
 function getGsuiteId(enrollmentId, name) {
-  const firstName = String(name || "").trim().split(/\s+/)[0].toLowerCase();
+  const firstName = String(name || "")
+    .trim()
+    .split(/\s+/)[0]
+    .toLowerCase();
+
   return `${enrollmentId}.${firstName}@students.iiests.ac.in`;
 }
 
-const isValidSemester = (n) => Number.isInteger(n) && n >= 1 && n <= 8;
+const isValidSemester = (n) =>
+  Number.isInteger(n) && n >= 1 && n <= 8;
 
 // <input type="date"> wants YYYY-MM-DD
 function toISODate(value) {
   if (!value) return null;
+
   if (value instanceof Date) {
     const y = value.getFullYear();
     const m = String(value.getMonth() + 1).padStart(2, "0");
     const d = String(value.getDate()).padStart(2, "0");
+
     return `${y}-${m}-${d}`;
   }
+
   return String(value).slice(0, 10);
 }
 
@@ -74,9 +114,9 @@ exports.getMyProfile = async (req, res, next) => {
     const parsed = parseEnrollmentId(enrollmentId);
 
     if (!parsed) {
-      return res
-        .status(400)
-        .json({ error: `Could not read programme details from enrolment number "${enrollmentId}".` });
+      return res.status(400).json({
+        error: `Could not read programme details from enrolment number "${enrollmentId}".`,
+      });
     }
 
     const studentResult = await pool.query(
@@ -87,7 +127,9 @@ exports.getMyProfile = async (req, res, next) => {
     );
 
     if (studentResult.rows.length === 0) {
-      return res.status(404).json({ error: `No student record found for ${enrollmentId}.` });
+      return res.status(404).json({
+        error: `No student record found for ${enrollmentId}.`,
+      });
     }
 
     const student = studentResult.rows[0];
@@ -96,6 +138,7 @@ exports.getMyProfile = async (req, res, next) => {
 
     // Fee details for the current semester (may not exist yet)
     let fee = {};
+
     if (isValidSemester(semester)) {
       const feeResult = await pool.query(
         `SELECT amount_paid, payment_date
@@ -103,6 +146,7 @@ exports.getMyProfile = async (req, res, next) => {
           WHERE enrollment_id = $1 AND semester = $2`,
         [enrollmentId, semester]
       );
+
       fee = feeResult.rows[0] || {};
     }
 
@@ -127,22 +171,28 @@ exports.getMyProfile = async (req, res, next) => {
   }
 };
 
-// GET /api/student/subjects?semester=3   (theory subjects of the student's own programme)
+// GET /api/student/subjects?semester=3
+// Returns theory subjects of the student's own programme.
 exports.getSubjects = async (req, res, next) => {
   try {
     const semester = Number.parseInt(req.query.semester, 10);
 
     if (!isValidSemester(semester)) {
-      return res.status(400).json({ error: "semester must be a number from 1 to 8." });
+      return res.status(400).json({
+        error: "semester must be a number from 1 to 8.",
+      });
     }
 
     const parsed = parseEnrollmentId(getEnrollmentId(req.user));
 
     if (!parsed) {
-      return res.status(400).json({ error: "Could not read your programme from your enrolment number." });
+      return res.status(400).json({
+        error: "Could not read your programme from your enrolment number.",
+      });
     }
 
-    // courseCode was checked against VALID_COURSE_CODES, so it is safe to use as a table name.
+    // courseCode was checked against VALID_COURSE_CODES,
+    // so it is safe to use as a table name.
     const { rows } = await pool.query(
       `SELECT id, subject_code, subject_name, course_type, credits, remarks
          FROM "${parsed.courseCode}"
@@ -176,14 +226,17 @@ exports.getSubjects = async (req, res, next) => {
   }
 };
 
-// PUT /api/student/open-elective   { semester, slotId, subjectCode }
+// PUT /api/student/open-elective
+// Body: { semester, slotId, subjectCode }
 exports.chooseOpenElective = async (req, res, next) => {
   try {
     const enrollmentId = getEnrollmentId(req.user);
     const parsed = parseEnrollmentId(enrollmentId);
 
     if (!parsed) {
-      return res.status(400).json({ error: "Could not read your programme from your enrolment number." });
+      return res.status(400).json({
+        error: "Could not read your programme from your enrolment number.",
+      });
     }
 
     const body = req.body || {};
@@ -196,9 +249,96 @@ exports.chooseOpenElective = async (req, res, next) => {
       subjectCode: String(body.subjectCode ?? "").trim(),
     });
 
-    res.json({ message: "Open elective saved.", chosen });
+    res.json({
+      message: "Open elective saved.",
+      chosen,
+    });
   } catch (err) {
-    if (err.status) return res.status(err.status).json({ error: err.message });
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message });
+    }
+
+    next(err);
+  }
+};
+
+// PUT /api/student/hindi-name
+// Body must be exactly: { "nameHindi": "..." }
+//
+// This endpoint intentionally accepts exactly one field and updates no other
+// student information.
+exports.updateMyHindiName = async (req, res, next) => {
+  try {
+    const body = req.body;
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({
+        error: "Request body must contain only nameHindi.",
+      });
+    }
+
+    const keys = Object.keys(body);
+
+    if (keys.length !== 1 || keys[0] !== "nameHindi") {
+      return res.status(400).json({
+        error: "Only the Hindi name can be updated.",
+      });
+    }
+
+    if (typeof body.nameHindi !== "string") {
+      return res.status(400).json({
+        error: "nameHindi must be a string.",
+      });
+    }
+
+    const nameHindi = body.nameHindi.trim().replace(/\s+/g, " ");
+
+    // Accept Devanagari characters, joiners, and spaces only.
+    if (
+      !nameHindi ||
+      nameHindi.length > 100 ||
+      /[^\u0900-\u097F\u200C\u200D ]/.test(nameHindi)
+    ) {
+      return res.status(400).json({
+        error:
+          "Enter a valid Hindi name using Devanagari characters only (maximum 100 characters).",
+      });
+    }
+
+    // Identify the student from the authenticated session, not from the body.
+    const enrollmentId = getEnrollmentId(req.user);
+    const parsed = parseEnrollmentId(enrollmentId);
+
+    if (!parsed) {
+      return res.status(400).json({
+        error: "Could not read your programme from your enrolment number.",
+      });
+    }
+
+    // This SQL statement updates only name_hindi.
+    // English name, mobile, semester, and other columns are untouched.
+    const result = await pool.query(
+      `UPDATE students
+          SET name_hindi = $1
+        WHERE enrollment_id = $2
+        RETURNING enrollment_id, name_hindi`,
+      [nameHindi, enrollmentId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Student record not found.",
+      });
+    }
+
+    return res.json({
+      message: "Hindi name updated successfully.",
+      student: {
+        enrollmentId: result.rows[0].enrollment_id,
+        nameHindi: result.rows[0].name_hindi,
+      },
+    });
+  } catch (err) {
     next(err);
   }
 };

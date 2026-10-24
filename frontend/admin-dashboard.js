@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupViewStudents();
     setupAddModal();
     setupStudentsCsvUpload();
-    setupSubjectsCsvModal();
+    setupCsvModal();
 });
 
 /*SMALL HELPERS*/
@@ -214,14 +214,30 @@ function setupStudentsCsvUpload() {
     });
 }
 
-/*UPLOAD SUBJECTS CSV*/
-function setupSubjectsCsvModal() {
+/*UPLOAD SUBJECTS / OPEN ELECTIVES CSV (shared modal)*/
+const CSV_KINDS = {
+    subjects: {
+        title: "Upload Subjects CSV",
+        hint: "Columns: subject_code, subject_name, subject_type (THEORY / PRACTICAL / SESSIONAL), credits, course_type, semester, remarks (optional). Subjects are added to the selected programme, so uploading the same file twice creates duplicates. For an open elective slot, use course_type \"Open Elective\".",
+        endpoint: "/admin/import/subjects",
+        done: "subject(s) added."
+    },
+    openElectives: {
+        title: "Upload Open Electives CSV",
+        hint: "Columns: subject_code, subject_name, semester, offered_by (optional). Credits are not needed: they come from the \"Open Elective\" row of the subjects table. These are the courses students can choose for the \"Open Elective\" slot. They are saved in the selected programme's own table (e.g. CSB_OE), which must already exist. Uploading again updates existing electives, so repeating a file is safe.",
+        endpoint: "/admin/import/open-electives",
+        done: "open elective(s) saved."
+    }
+};
+
+function setupCsvModal() {
     const modal = document.getElementById("subjectsCsvModal");
-    const openBtn = document.getElementById("uploadSubjectsCsvBtn");
-    const closeBtn = document.getElementById("closeSubjectsModalBtn");
     const form = document.getElementById("subjectsCsvForm");
+    const closeBtn = document.getElementById("closeSubjectsModalBtn");
     const submitBtn = document.getElementById("subjectsCsvSubmitBtn");
     const statusEl = document.getElementById("subjectsCsvStatus");
+
+    let kind = CSV_KINDS.subjects;
 
     const showStatus = (message, isError) => {
         statusEl.textContent = message;
@@ -229,10 +245,19 @@ function setupSubjectsCsvModal() {
         statusEl.classList.remove("d-none");
     };
 
-    openBtn.addEventListener("click", () => {
+    const openModal = (selectedKind) => {
+        kind = selectedKind;
+        document.getElementById("csvModalTitle").textContent = kind.title;
+        document.getElementById("csvModalHint").textContent = kind.hint;
         statusEl.classList.add("d-none");
+        form.reset();
         modal.classList.remove("d-none");
-    });
+    };
+
+    document.getElementById("uploadSubjectsCsvBtn")
+        .addEventListener("click", () => openModal(CSV_KINDS.subjects));
+    document.getElementById("uploadOpenElectivesCsvBtn")
+        .addEventListener("click", () => openModal(CSV_KINDS.openElectives));
 
     closeBtn.addEventListener("click", () => {
         modal.classList.add("d-none");
@@ -259,7 +284,7 @@ function setupSubjectsCsvModal() {
             formData.append("courseCode", courseCode);
             formData.append("file", file);
 
-            const res = await fetch(`${API_BASE}/admin/import/subjects`, {
+            const res = await fetch(`${API_BASE}${kind.endpoint}`, {
                 method: "POST",
                 headers: { Authorization: `Bearer ${sessionToken}` },
                 body: formData
@@ -270,10 +295,10 @@ function setupSubjectsCsvModal() {
             const data = await readJson(res);
 
             if (res.ok) {
-                showStatus(`${data.message}\n${data.imported} subject(s) added.`, false);
+                showStatus(`${data.message}\n${data.imported} ${kind.done}`, false);
                 form.reset();
             } else {
-                showStatus(errorText(data, "Failed to import subjects."), true);
+                showStatus(errorText(data, "Upload failed."), true);
             }
         } catch (err) {
             showStatus("Network error during upload.", true);

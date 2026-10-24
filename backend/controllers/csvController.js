@@ -2,6 +2,7 @@ const fs = require("fs");
 
 const csvImportService = require("../services/csvImportService");
 const csvSubjectImportService = require("../services/csvSubjectImportService");
+const csvOpenElectiveImportService = require("../services/csvOpenElectiveImportService");
 
 // multer leaves the upload in uploads/ - delete it once we are done with it.
 const removeTempFile = (file) => {
@@ -79,7 +80,47 @@ const importSubjects = async (req, res) => {
     }
 };
 
+const importOpenElectives = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                message: "CSV file is required"
+            });
+        }
+
+        const courseCode = req.body && req.body.courseCode;
+
+        if (!courseCode) {
+            return res.status(400).json({
+                message: "courseCode is required"
+            });
+        }
+
+        const result =
+            await csvOpenElectiveImportService.importOpenElectives(
+                req.file.path,
+                courseCode
+            );
+
+        res.status(200).json({
+            message: `Open electives imported successfully for ${result.course}`,
+            ...result
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(error.status || 500).json({
+            message: "Failed to import open electives",
+            error: error.message
+        });
+    } finally {
+        removeTempFile(req.file);
+    }
+};
+
 module.exports = {
     importStudents,
-    importSubjects
+    importSubjects,
+    importOpenElectives
 };

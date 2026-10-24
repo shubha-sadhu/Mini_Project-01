@@ -453,9 +453,90 @@ function addRow(tableID, data = null) {
             String(data.type || "").toLowerCase() === "elective" ? "elective" : "core";
         row.cells[4].querySelector('input').value = data.credits ?? "";
         row.cells[5].querySelector('input').value = data.remarks ?? "";
+
+        // "Open Elective" slot: the student picks the actual course from a list
+        if (data.openElective) setupOpenElectiveRow(row, data);
     }
 
     updateRowNumbers(tableID);
+}
+
+// Turns a subject row into an open-elective picker: the name cell becomes a
+// dropdown of the electives on offer, and choosing one is saved straight away.
+function setupOpenElectiveRow(row, data) {
+    const { slotId, selectedCode, options } = data.openElective;
+    const codeInput = row.cells[1].querySelector('input');
+    const typeSelect = row.cells[3].querySelector('select');
+    const creditInput = row.cells[4].querySelector('input');
+
+    const select = document.createElement('select');
+    select.required = true;
+    select.className = 'open-elective-select';
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.textContent = options.length
+        ? 'Choose your open elective'
+        : 'No open electives available yet';
+    select.appendChild(placeholder);
+
+    options.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.code;
+        opt.textContent = `${o.code} - ${o.name}`;
+        select.appendChild(opt);
+    });
+
+    select.value = selectedCode || '';
+    select.disabled = options.length === 0;
+
+    row.cells[2].innerHTML = '';
+    row.cells[2].appendChild(select);
+
+    typeSelect.value = 'elective';
+    codeInput.readOnly = true;
+    creditInput.readOnly = true;
+
+    // Show the chosen course's code (or the placeholder's own code). Credits always
+    // stay as set on the "Open Elective" row, so they are not changed here.
+    const showOption = (code) => {
+        const o = options.find(x => x.code === code);
+        codeInput.value = o ? o.code : (data.code ?? '');
+        creditInput.value = data.credits ?? '';
+    };
+    showOption(selectedCode);
+
+    let lastSaved = selectedCode || '';
+
+    select.addEventListener('change', async () => {
+        select.disabled = true;
+        try {
+            const res = await fetch(`${STUDENT_API}/open-elective`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionToken}`
+                },
+                body: JSON.stringify({
+                    semester: Number(document.getElementById('regSemester').value),
+                    slotId,
+                    subjectCode: select.value
+                })
+            });
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(body.error || body.message || 'Could not save your choice.');
+
+            lastSaved = select.value;
+            showOption(select.value);
+        } catch (err) {
+            alert(err.message);
+            select.value = lastSaved;       // put back the previous choice
+            showOption(lastSaved);
+        } finally {
+            select.disabled = false;
+        }
+    });
 }
 
 function removeRow(button) {

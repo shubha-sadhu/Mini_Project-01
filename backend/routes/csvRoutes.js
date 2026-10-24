@@ -29,4 +29,13 @@ router.post(
     csvController.importSubjects
 );
 
+// Form fields: file (the CSV) and courseCode. Columns: subject_code, subject_name, credits, semester, offered_by
+router.post(
+    "/open-electives",
+    requireAuth,
+    adminMiddleware,
+    upload.single("file"),
+    csvController.importOpenElectives
+);
+
 module.exports = router;

@@ -1,4 +1,5 @@
 const pool = require("../config/postgres");
+const openElectiveService = require("../services/openElectiveService");
 
 /*
  * Everything the portal shows about a student is worked out from data that
@@ -143,11 +144,7 @@ exports.getSubjects = async (req, res, next) => {
 
     // courseCode was checked against VALID_COURSE_CODES, so it is safe to use as a table name.
     const { rows } = await pool.query(
-      `SELECT subject_code AS code,
-              subject_name AS name,
-              course_type  AS type,
-              credits,
-              remarks
+      `SELECT id, subject_code, subject_name, course_type, credits, remarks
          FROM "${parsed.courseCode}"
         WHERE semester = $1
           AND subject_type = 'THEORY'
@@ -155,8 +152,53 @@ exports.getSubjects = async (req, res, next) => {
       [semester]
     );
 
-    res.json({ subjects: rows });
+    // "Open Elective" slots also get the list of electives to choose from
+    // and whatever this student has already picked.
+    const withElectives = await openElectiveService.attachOpenElectives({
+      enrollmentId: getEnrollmentId(req.user),
+      courseCode: parsed.courseCode,
+      semester,
+      subjects: rows,
+    });
+
+    const subjects = withElectives.map((s) => ({
+      code: s.subject_code,
+      name: s.subject_name,
+      type: s.course_type,
+      credits: s.credits,
+      remarks: s.remarks,
+      ...(s.openElective ? { openElective: s.openElective } : {}),
+    }));
+
+    res.json({ subjects });
   } catch (err) {
+    next(err);
+  }
+};
+
+// PUT /api/student/open-elective   { semester, slotId, subjectCode }
+exports.chooseOpenElective = async (req, res, next) => {
+  try {
+    const enrollmentId = getEnrollmentId(req.user);
+    const parsed = parseEnrollmentId(enrollmentId);
+
+    if (!parsed) {
+      return res.status(400).json({ error: "Could not read your programme from your enrolment number." });
+    }
+
+    const body = req.body || {};
+
+    const chosen = await openElectiveService.saveChoice({
+      enrollmentId,
+      courseCode: parsed.courseCode,
+      semester: Number(body.semester),
+      slotId: Number(body.slotId),
+      subjectCode: String(body.subjectCode ?? "").trim(),
+    });
+
+    res.json({ message: "Open elective saved.", chosen });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
     next(err);
   }
 };

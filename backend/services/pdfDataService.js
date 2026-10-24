@@ -1,4 +1,5 @@
 const pool = require("../config/postgres");
+const { substituteChoices } = require("./openElectiveService");
 
 // Valid course codes for pre-checking before making the SQL query
 const VALID_COURSE_CODES = ["CSB", "CSM", "CSP", "ITB", "ITM", "ITP"];
@@ -52,6 +53,7 @@ const getCurrentRegistrationData = async (enrollmentId) => {
     const subjectsResult = await pool.query(
         `
         SELECT
+            id,
             subject_code,
             subject_name,
             subject_type,
@@ -72,14 +74,23 @@ const getCurrentRegistrationData = async (enrollmentId) => {
 );
     const fee = feeResult.rows[0] || {};
 
+    // Swap each "Open Elective" slot for the course the student chose
+    // (throws if they have not chosen yet)
+    const allSubjects = await substituteChoices({
+        enrollmentId,
+        courseCode,
+        semester,
+        subjects: subjectsResult.rows
+    });
+
     // Separating theory and practical subjects
     const theorySubjects =
-        subjectsResult.rows.filter(
+        allSubjects.filter(
             (subject) => subject.subject_type === "THEORY"
         );
 
     const practicalSubjects =
-        subjectsResult.rows.filter(
+        allSubjects.filter(
             (subject) =>
                 subject.subject_type === "PRACTICAL" ||
                 subject.subject_type === "SESSIONAL"

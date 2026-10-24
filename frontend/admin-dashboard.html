@@ -65,6 +65,10 @@
                             style="color: var(--success); border-color: var(--success);">
                             <i class="fa-solid fa-book"></i> Upload Subjects CSV
                         </button>
+                        <button class="action-btn" id="uploadOpenElectivesCsvBtn"
+                            style="color: var(--success); border-color: var(--success);">
+                            <i class="fa-solid fa-list-check"></i> Upload Open Electives CSV
+                        </button>
                     </div>
                 </div>
 
@@ -151,13 +155,9 @@
     <!-- UPLOAD SUBJECTS CSV MODAL -->
     <div id="subjectsCsvModal" class="modal-overlay d-none">
         <div class="modal-content glass-card">
-            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-book"></i>
-                Upload Subjects CSV</h3>
-            <p class="subtitle" style="margin-bottom: 20px; font-size: 0.85rem;">
-                Columns: subject_code, subject_name, subject_type (THEORY / PRACTICAL / SESSIONAL), credits,
-                course_type, semester, remarks (optional). Subjects are added to the selected programme, so uploading
-                the same file twice creates duplicates.
-            </p>
+            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-file-csv"></i>
+                <span id="csvModalTitle">Upload CSV</span></h3>
+            <p class="subtitle" style="margin-bottom: 20px; font-size: 0.85rem;"><span id="csvModalHint"></span></p>
 
             <form id="subjectsCsvForm">
                 <div class="input-group" style="margin-bottom: 12px;">

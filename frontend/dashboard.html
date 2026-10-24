@@ -154,6 +154,7 @@
                         <div class="form-title-wrapper">
                             <h2 class="gold-text">Semester Registration Form</h2>
                             <p class="subtitle">For Undergraduate / Postgraduate Courses</p>
+                            <p id="autofillStatus" class="subtitle d-none" style="color: var(--danger, #e74c3c);"></p>
                         </div>
     
                         <div class="form-section">
@@ -161,7 +162,7 @@
                             <div class="section-body grid-2-col">
                                 <div class="input-group">
                                     <label>1(a). Name (in English)</label>
-                                    <input type="text" id="regNameEnglish" placeholder="Enter your full name" class="glass-input" required>
+                                    <input type="text" id="regNameEnglish" placeholder="Enter your full name" class="glass-input readonly-input" readonly required>
                                 </div>
                                 <div class="input-group">
                                     <label>1(b). Name (in Hindi)</label>
@@ -173,11 +174,11 @@
                                 </div>
                                 <div class="input-group">
                                     <label>2. Department</label>
-                                    <input type="text" placeholder="e.g. Computer Science and Technology (CST)" class="glass-input" required>
+                                    <input type="text" id="regDepartment" placeholder="e.g. Computer Science and Technology (CST)" class="glass-input" required>
                                 </div>
                                 <div class="input-group">
                                     <label>3. Programme</label>
-                                    <select class="glass-input">
+                                    <select class="glass-input" id="regProgramme">
                                         <option value="" selected disabled>Select programme</option>
                                         <option value="B.Tech">B.Tech.</option>
                                         <option value="M.Tech">M.Tech.</option>
@@ -187,11 +188,11 @@
                                 </div>
                                 <div class="input-group">
                                     <label>4. Specialization</label>
-                                    <input type="text" placeholder="e.g. N/A" class="glass-input">
+                                    <input type="text" id="regSpecialization" placeholder="e.g. N/A" class="glass-input">
                                 </div>
                                 <div class="input-group">
                                     <label>5. Registration for Semester</label>
-                                    <select class="glass-input">
+                                    <select class="glass-input" id="regSemester">
                                         <option value="" selected disabled>Select semester</option>
                                         <option value="1">1st Semester</option>
                                         <option value="2">2nd Semester</option>
@@ -205,15 +206,15 @@
                                 </div>
                                 <div class="input-group">
                                     <label>6. Enrolment No</label>
-                                    <input type="text" placeholder="Enter your enrolment number" class="glass-input" required>
+                                    <input type="text" id="regEnrollment" placeholder="Enter your enrolment number" class="glass-input readonly-input" readonly required>
                                 </div>
                                 <div class="input-group">
                                     <label>7. G-suite ID</label>
-                                    <input type="email" placeholder="your.id@students.iiests.ac.in" class="glass-input" required>
+                                    <input type="email" id="regGsuite" placeholder="your.id@students.iiests.ac.in" class="glass-input readonly-input" readonly required>
                                 </div>
                                 <div class="input-group">
                                     <label>8. Mobile No.</label>
-                                    <input type="tel" placeholder="Enter your mobile number" class="glass-input" maxlength="10" required>
+                                    <input type="tel" id="regMobile" placeholder="Enter your mobile number" class="glass-input" maxlength="10" required>
                                 </div>
                             </div>
                         </div>
@@ -223,7 +224,7 @@
                             <div class="section-body grid-2-col">
                                 <div class="input-group">
                                     <label>9(a). Amount Paid (Rs.)</label>
-                                    <input type="number" placeholder="e.g. 45000" class="glass-input" min="0" step="1" oninput="this.value = Math.abs(this.value)" required>
+                                    <input type="number" id="regAmountPaid" placeholder="e.g. 45000" class="glass-input" min="0" step="1" oninput="this.value = Math.abs(this.value)" required>
                                 </div>
                                 <div class="input-group">
                                     <label>9(b). Payment Date</label>
@@ -340,7 +341,7 @@
 
                                         <div class="input-group">
                                             <label>Name (in English)</label>
-                                            <input type="text" value="" readonly class="readonly-input">
+                                            <input type="text" id="profileNameEnglish" value="" readonly class="readonly-input">
                                         </div>
                                         <div class="input-group">
                                             <label>Name (in Hindi)</label>
@@ -352,32 +353,37 @@
                                         </div>
                                         <div class="input-group">
                                             <label>Enrolment No.</label>
-                                            <input type="text" value="2025CSB120" readonly class="readonly-input">
+                                            <input type="text" id="profileEnrollment" value="" readonly class="readonly-input">
                                         </div>
                                         <div class="input-group">
                                             <label>G-Suite ID</label>
-                                            <input type="email" value="2025csb120.aryan@students.iiests.ac.in" readonly class="readonly-input">
+                                            <input type="email" id="profileGsuite" value="" readonly class="readonly-input">
                                         </div>
                                         <div class="input-group">
                                             <label>Department</label>
-                                            <input type="text" value="Computer Science and Technology (CST)" readonly class="readonly-input">
+                                            <input type="text" id="profileDepartment" value="" readonly class="readonly-input">
                                         </div>
                                         <div class="input-group">
                                             <label>Programme</label>
-                                            <select class="glass-input readonly-input" disabled>
-                                                <option value="B.Tech" selected>B.Tech.</option>
+                                            <select class="glass-input readonly-input" id="profileProgramme" disabled>
+                                                <option value="" selected disabled>-</option>
+                                                <option value="B.Tech">B.Tech.</option>
+                                                <option value="M.Tech">M.Tech.</option>
+                                                <option value="Dual Degree">Dual Degree</option>
+                                                <option value="PhD">PhD</option>
                                             </select>
                                         </div>
                                         <div class="input-group">
                                             <label>Gender</label>
-                                            <select class="glass-input readonly-input" disabled>
-                                                <option value="male" selected>Male</option>
+                                            <select class="glass-input readonly-input" id="profileGender" disabled>
+                                                <option value="" selected disabled>-</option>
+                                                <option value="male">Male</option>
                                                 <option value="female">Female</option>
                                             </select>
                                         </div>
                                         <div class="input-group">
                                             <label>Specialization</label>
-                                            <input type="text" value="N/A" readonly class="readonly-input">
+                                            <input type="text" id="profileSpecialization" value="" readonly class="readonly-input">
                                         </div>
                                     </form>
                                 </div>

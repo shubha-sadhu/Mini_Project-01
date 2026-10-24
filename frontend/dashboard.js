@@ -2,6 +2,12 @@
         AUTH GUARD + LOAD LOGGED-IN USER'S PROFILE
 ==================================================*/
 const API_BASE = "http://localhost:5000/api/auth";
+const STUDENT_API = "http://localhost:5000/api/student";
+
+// Student record loaded from the database (null until it arrives).
+let studentProfile = null;
+// Last user object returned by /api/auth/me (or the login cache).
+let latestUser = null;
 
 const sessionToken = sessionStorage.getItem("sessionToken");
 
@@ -31,7 +37,8 @@ function getInitials(displayName) {
 }
 
 function applyUserToDashboard(user) {
-    const displayName = getDisplayNameFromEmail(user.email);
+    latestUser = user;
+    const displayName = (studentProfile && studentProfile.nameEnglish) || getDisplayNameFromEmail(user.email);
     const initials = getInitials(displayName);
 
     // Sidebar
@@ -60,8 +67,10 @@ function applyUserToDashboard(user) {
     const greetingEl = document.querySelector(".greeting-box h2");
     if (greetingEl) greetingEl.textContent = `Welcome back, ${displayName}!`;
 
+    // Until the student record arrives, fall back to what we can derive from the login.
+    // Once it has arrived, fillSettingsFromProfile() owns these fields.
     const profileForm = document.getElementById("profileForm");
-    if (profileForm) {
+    if (profileForm && !studentProfile) {
         const nameInput = profileForm.querySelector('input[type="text"]');
         const emailInput = profileForm.querySelector('input[type="email"]');
         if (nameInput) nameInput.value = displayName;
@@ -70,7 +79,7 @@ function applyUserToDashboard(user) {
 
     // Settings -> Update Contact Info
     const mobileInputEl = document.getElementById("mobileInput");
-    if (mobileInputEl) mobileInputEl.value = user.mobile || "";
+    if (mobileInputEl) mobileInputEl.value = (studentProfile && studentProfile.mobile) || user.mobile || "";
 }
 
 // Paint instantly from the cache written at login (avoids a blank flash),
@@ -110,6 +119,128 @@ if (sessionToken) {
             console.error("Network error loading profile:", err);
         });
 }
+
+/*==================================================
+        AUTOFILL: SETTINGS PAGE + REGISTRATION FORM
+        Pulls the student's record from the database and fills
+        both pages. Subjects come from a separate call so they
+        can be reloaded when the semester dropdown changes.
+==================================================*/
+function setInputValue(id, value) {
+    const el = document.getElementById(id);
+    if (el && value !== undefined && value !== null) el.value = value;
+}
+
+// Picks the <option> that matches `value`, ignoring case and dots
+// (so "B.Tech." from the database matches the "B.Tech" option).
+function setSelectValue(id, value) {
+    const el = document.getElementById(id);
+    if (!el || value === undefined || value === null || value === "") return;
+
+    const normalise = (v) => String(v).trim().toLowerCase().replace(/\./g, "");
+    let wanted = normalise(value);
+    if (id.toLowerCase().includes("gender")) {
+        if (wanted === "m") wanted = "male";
+        if (wanted === "f") wanted = "female";
+    }
+
+    const match = Array.from(el.options).find(o => o.value && normalise(o.value) === wanted);
+    if (match) el.value = match.value;
+}
+
+function showAutofillError(message) {
+    const el = document.getElementById("autofillStatus");
+    if (!el) return;
+    el.textContent = message;
+    el.classList.remove("d-none");
+}
+
+function fillSettingsFromProfile(s) {
+    setInputValue("profileNameEnglish", s.nameEnglish);
+    setInputValue("profileNameHindi", s.nameHindi);
+    setInputValue("profileEnrollment", s.enrollmentId);
+    setInputValue("profileGsuite", s.gsuiteId || (latestUser && latestUser.email));
+    setInputValue("profileDepartment", s.department);
+    setSelectValue("profileProgramme", s.programme);
+    setSelectValue("profileGender", s.gender);
+    setInputValue("profileSpecialization", s.specialization);
+    setInputValue("mobileInput", s.mobile);
+}
+
+function fillRegistrationFromProfile(s) {
+    setInputValue("regNameEnglish", s.nameEnglish);
+    setInputValue("regNameHindi", s.nameHindi);
+    setInputValue("regDepartment", s.department);
+    setSelectValue("regProgramme", s.programme);
+    setInputValue("regSpecialization", s.specialization);
+    setSelectValue("regSemester", s.semester);
+    setInputValue("regEnrollment", s.enrollmentId);
+    setInputValue("regGsuite", s.gsuiteId || (latestUser && latestUser.email));
+    setInputValue("regMobile", s.mobile);
+    setInputValue("regAmountPaid", s.amountPaid);
+    setInputValue("paymentDate", s.paymentDate);
+}
+
+function fillTheoryTable(subjects) {
+    const tbody = document.getElementById("theoryTable").getElementsByTagName("tbody")[0];
+    tbody.innerHTML = "";
+    subjects.forEach(subject => addRow("theoryTable", subject));
+}
+
+async function loadSubjects(semester) {
+    if (!semester) return;
+
+    const res = await fetch(
+        `${STUDENT_API}/subjects?semester=${encodeURIComponent(semester)}`,
+        { headers: { Authorization: `Bearer ${sessionToken}` } }
+    );
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+        throw new Error(data.error || data.message || "Could not load subjects.");
+    }
+
+    fillTheoryTable(data.subjects || []);
+}
+
+async function loadStudentData() {
+    if (!sessionToken) return;
+
+    try {
+        const res = await fetch(`${STUDENT_API}/me`, {
+            headers: { Authorization: `Bearer ${sessionToken}` },
+        });
+
+        if (res.status === 401) {
+            sessionStorage.removeItem("sessionToken");
+            sessionStorage.removeItem("cachedUser");
+            window.location.href = "../login/index.html";
+            return;
+        }
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            throw new Error(data.error || data.message || "Could not load your student details.");
+        }
+
+        studentProfile = data.student;
+
+        fillSettingsFromProfile(studentProfile);
+        fillRegistrationFromProfile(studentProfile);
+
+        // Re-run so the sidebar, greeting and avatar use the real name.
+        if (latestUser) applyUserToDashboard(latestUser);
+
+        await loadSubjects(studentProfile.semester);
+
+    } catch (err) {
+        console.error("Autofill error:", err);
+        showAutofillError("Could not load your saved details. You can fill in the form manually.");
+    }
+}
+
+loadStudentData();
 
 // Clear the session before the default logout link navigates away.
 const logoutBtn = document.querySelector(".logout-btn");
@@ -289,7 +420,7 @@ if (languageSelect) {
 /*==================================================
         DYNAMIC REGISTRATION FORM TABLES (ADD/REMOVE)
 ==================================================*/
-function addRow(tableID) {
+function addRow(tableID, data = null) {
     const table = document.getElementById(tableID).getElementsByTagName('tbody')[0];
     const rowCount = table.rows.length;
     const row = table.insertRow(rowCount);
@@ -314,6 +445,16 @@ function addRow(tableID) {
             </button>`;
     }
     
+    // Pre-fill the new row when subject data is supplied (autofill from database)
+    if (data && tableID === 'theoryTable') {
+        row.cells[1].querySelector('input').value = data.code ?? "";
+        row.cells[2].querySelector('input').value = data.name ?? "";
+        row.cells[3].querySelector('select').value =
+            String(data.type || "").toLowerCase() === "elective" ? "elective" : "core";
+        row.cells[4].querySelector('input').value = data.credits ?? "";
+        row.cells[5].querySelector('input').value = data.remarks ?? "";
+    }
+
     updateRowNumbers(tableID);
 }
 
@@ -383,7 +524,11 @@ window.addEventListener('load', () => {
     if (window.innerWidth <= 992) {
         sidebar.classList.add('collapsed');
     }
-    for(let i=0; i<5; i++) { addRow('theoryTable'); }
+    // Blank starter rows - but not if the database autofill has already filled the table.
+    const theoryBody = document.getElementById('theoryTable').getElementsByTagName('tbody')[0];
+    if (theoryBody.rows.length === 0) {
+        for(let i=0; i<5; i++) { addRow('theoryTable'); }
+    }
 
     const paymentDateInput = document.getElementById('paymentDate');
     if(paymentDateInput) {
@@ -587,6 +732,19 @@ togglePasswordBtns.forEach(btn => {
         }
     });
 });
+
+// Reload the subject list when the student picks a different semester
+const regSemesterSelect = document.getElementById("regSemester");
+if (regSemesterSelect) {
+    regSemesterSelect.addEventListener("change", async () => {
+        try {
+            await loadSubjects(regSemesterSelect.value);
+        } catch (err) {
+            console.error("Could not load subjects:", err);
+            showAutofillError("Could not load subjects for that semester.");
+        }
+    });
+}
 
 // Registration Form Submit
 const regForm = document.getElementById('regForm');

@@ -11,6 +11,7 @@ const authRoutes = require("./routes/auth");
 const cleanupPDFs=require("./services/cleanupService.js");
 const generatePdfRoutes=require("./routes/generatePdfRoutes.js");
 const csvRoutes = require("./routes/csvRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 
 const app = express();
 
@@ -29,14 +30,15 @@ app.use("/api/auth", authRoutes);
 // app.use("/api/pdf", pdfRoutes);
 
 app.use("/api/generatePdf", generatePdfRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/admin/import", csvRoutes);
 
 // Fallback error handler for anything unexpected that slips past a route.
+// (Kept after every route so it actually catches their errors.)
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Something went wrong on the server." });
 });
-
-app.use("/api/admin/import", csvRoutes);
 
 const PORT = process.env.PORT || 5000;
 

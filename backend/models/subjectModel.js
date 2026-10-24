@@ -1,6 +1,8 @@
 const pool = require("../config/postgres");
 
-const insertSubject = async (courseCode, subject) => {
+// `courseCode` is checked against a whitelist by the caller before it gets here,
+// because it is used as the table name. Pass a transaction `client` to batch inserts.
+const insertSubject = async (courseCode, subject, client = pool) => {
     const query = `
         INSERT INTO "${courseCode}" (
             subject_code,
@@ -25,7 +27,7 @@ const insertSubject = async (courseCode, subject) => {
         subject.semester
     ];
 
-    const result = await pool.query(query, values);
+    const result = await client.query(query, values);
 
     return result.rows[0];
 };

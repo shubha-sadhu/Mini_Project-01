@@ -6,7 +6,14 @@ const parseCSV = (filePath) => {
         const results = [];
 
         fs.createReadStream(filePath)
-            .pipe(csv())
+            .pipe(
+                csv({
+                    // Excel adds a hidden BOM to the first header and people vary the
+                    // capitalisation, so "Enrollment_ID" and "enrollment_id" both work.
+                    mapHeaders: ({ header }) =>
+                        header.replace(/^\uFEFF/, "").trim().toLowerCase(),
+                })
+            )
             .on("data", (row) => {
                 results.push(row);
             })

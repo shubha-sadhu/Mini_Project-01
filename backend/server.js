@@ -12,6 +12,7 @@ const cleanupPDFs=require("./services/cleanupService.js");
 const generatePdfRoutes=require("./routes/generatePdfRoutes.js");
 const csvRoutes = require("./routes/csvRoutes");
 const studentRoutes = require("./routes/studentRoutes");
+const adminStudentRoutes = require("./routes/adminStudentRoutes");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/generatePdf", generatePdfRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/admin/import", csvRoutes);
+app.use("/api/admin/students", adminStudentRoutes);
 
 // Fallback error handler for anything unexpected that slips past a route.
 // (Kept after every route so it actually catches their errors.)

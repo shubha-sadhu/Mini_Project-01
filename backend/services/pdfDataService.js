@@ -12,7 +12,8 @@ const getCurrentRegistrationData = async (enrollmentId) => {
             enrollment_id,
             name_english,
             name_hindi,
-            mobile
+            mobile,
+            semester
         FROM students
         WHERE enrollment_id = $1
         `,
@@ -28,7 +29,14 @@ const getCurrentRegistrationData = async (enrollmentId) => {
     // Extracting details from enrollment number
     const enrollmentYear = Number(enrollmentId.substring(0, 4));
     const courseCode = enrollmentId.substring(4, 7).toUpperCase();
-    const semester = getCurrentSemester(enrollmentYear);
+    // The semester comes from the database. The date-based calculation is only
+    // a sanity check: a mismatch is logged, but the stored value is what is used.
+    const calculatedSemester = getCurrentSemester(enrollmentYear);
+    const semester = resolveSemester(
+        student.semester,
+        calculatedSemester,
+        enrollmentId
+    );
 
     // Checking if couse code is not tampered to attack DB
     if (!VALID_COURSE_CODES.includes(courseCode)) {
@@ -109,6 +117,31 @@ const getCurrentSemester = (enrollmentYear) => {
 
     // January-June = even semester
     return academicYear * 2;
+};
+
+
+// Uses the semester stored in the database; the calculated one only cross-checks it.
+const resolveSemester = (storedSemester, calculatedSemester, enrollmentId) => {
+    const stored = Number(storedSemester);
+    const isValid = Number.isInteger(stored) && stored >= 1 && stored <= 8;
+
+    // Nothing usable in the database: fall back to the calculation so the PDF still works.
+    if (!isValid) {
+        console.warn(
+            `[semester] ${enrollmentId}: no valid semester in database (${storedSemester}); ` +
+            `using calculated semester ${calculatedSemester}.`
+        );
+        return calculatedSemester;
+    }
+
+    if (stored !== calculatedSemester) {
+        console.warn(
+            `[semester] ${enrollmentId}: database says ${stored}, date-based calculation ` +
+            `says ${calculatedSemester}. Using the database value.`
+        );
+    }
+
+    return stored;
 };
 
 

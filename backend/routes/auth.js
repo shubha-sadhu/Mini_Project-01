@@ -9,6 +9,7 @@ const Otp = require("../models/Otp");
 const { requireAuth } = require("../middleware/auth_middle");
 const { sendMail, otpEmailTemplate, tempPasswordEmailTemplate } = require("../utils/mailer");
 const { generateOtp, hashOtp, compareOtp, generateTempPassword } = require("../utils/otp");
+const { isEnrolledStudent, NOT_ENROLLED_MESSAGE } = require("../services/enrollmentCheckService");
 
 const router = express.Router();
 
@@ -78,6 +79,12 @@ router.post("/send-otp", otpLimiter, async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ error: "An account with this email already exists. Please log in instead." });
+    }
+
+    // Only students who are in the college records may sign up. Checked before the
+    // OTP is created or any e-mail is sent.
+    if (!(await isEnrolledStudent(email))) {
+      return res.status(403).json({ error: NOT_ENROLLED_MESSAGE });
     }
 
     const otp = generateOtp();
@@ -192,6 +199,12 @@ router.post("/register", async (req, res) => {
       return res.status(409).json({ error: "An account with this email already exists. Please log in instead." });
     }
 
+    // Checked again here so an account can never be created for someone who is not in
+    // the college records, even with a verification token issued earlier.
+    if (!(await isEnrolledStudent(email))) {
+      return res.status(403).json({ error: NOT_ENROLLED_MESSAGE });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Save strictly the auth data
@@ -275,74 +288,6 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({ error: "Could not log in right now. Please try again." });
   }
 });
-
-/* ==============================
-      GOOGLE LOGIN
-============================== */
-router.post("/google-login", async (req, res) => {
-  try {
-    const { access_token } = req.body;
-
-    if (!access_token) {
-      return res.status(400).json({ error: "Access token is required." });
-    }
-
-    // 1. Fetch user profile from Google using the token
-    const googleRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
-    
-    if (!googleRes.ok) {
-      return res.status(401).json({ error: "Invalid Google token." });
-    }
-
-    const googleData = await googleRes.json();
-    const email = googleData.email.toLowerCase();
-    const fullname = googleData.name;
-
-    // 2. Enforce the institute domain restriction
-    if (!isInstituteEmail(email)) {
-      return res.status(403).json({ error: `Please use your official @${getAllowedDomain()} email.` });
-    }
-
-    // 3. Check if user exists in the database
-    let user = await User.findOne({ email });
-
-    // 4. Auto-register them if they don't exist
-    // Since Google verified their email, we can safely create an account for them.
-    if (!user) {
-      const crypto = require("crypto");
-      // Create a random impossible-to-guess password hash since they use Google
-      const dummyPassword = crypto.randomBytes(16).toString("hex");
-      const passwordHash = await bcrypt.hash(dummyPassword, 10);
-
-      user = await User.create({
-        email,
-        passwordHash,
-        fullname: fullname || "Institute Student",
-        mobile: "0000000000", // Dummy placeholder since Google doesn't provide mobile
-        isEmailVerified: true,
-      });
-    }
-
-    // 5. Generate a session token
-    const sessionToken = signSessionToken(user._id.toString());
-
-    // 6. Send them to the dashboard!
-    return res.json({
-      message: "Login successful.",
-      sessionToken,
-      user: {
-        id: user._id,
-        email: user.email,
-        fullname: user.fullname,
-        mobile: user.mobile,
-      },
-    });
-  } catch (err) {
-    console.error("google-login error:", err);
-    return res.status(500).json({ error: "Could not authenticate with Google right now." });
-  }
-});
-
 
 /* ==============================
       FORGOT PASSWORD

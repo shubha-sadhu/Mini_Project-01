@@ -112,8 +112,9 @@ const substituteChoices = async ({ enrollmentId, courseCode, semester, subjects 
     });
 };
 
-// Saves (or changes) a student's pick for one slot.
-const saveChoice = async ({ enrollmentId, courseCode, semester, slotId, subjectCode }) => {
+// Saves (or changes) a student's pick for one slot. Pass a transaction `client` so several
+// picks (and other changes) can be saved together or not at all.
+const saveChoice = async ({ enrollmentId, courseCode, semester, slotId, subjectCode, client = pool }) => {
     const table = oeTable(courseCode);
 
     if (!isValidSemester(semester)) {
@@ -123,7 +124,7 @@ const saveChoice = async ({ enrollmentId, courseCode, semester, slotId, subjectC
         throw new HttpError(400, "slotId and subjectCode are required.");
     }
 
-    const slot = await pool.query(
+    const slot = await client.query(
         `SELECT id, course_type FROM "${courseCode}" WHERE id = $1 AND semester = $2`,
         [slotId, semester]
     );
@@ -133,7 +134,7 @@ const saveChoice = async ({ enrollmentId, courseCode, semester, slotId, subjectC
 
     let option;
     try {
-        option = await pool.query(
+        option = await client.query(
             `SELECT subject_code AS code, subject_name AS name
                FROM ${table}
               WHERE semester = $1 AND subject_code = $2`,
@@ -148,7 +149,7 @@ const saveChoice = async ({ enrollmentId, courseCode, semester, slotId, subjectC
     }
 
     // With two slots in one semester, the same course can't be picked twice.
-    const duplicate = await pool.query(
+    const duplicate = await client.query(
         `SELECT 1 FROM student_open_electives
           WHERE enrollment_id = $1 AND semester = $2
             AND subject_code = $3 AND slot_id <> $4`,
@@ -159,7 +160,7 @@ const saveChoice = async ({ enrollmentId, courseCode, semester, slotId, subjectC
     }
 
     try {
-        await pool.query(
+        await client.query(
             `INSERT INTO student_open_electives (enrollment_id, semester, slot_id, subject_code)
              VALUES ($1, $2, $3, $4)
              ON CONFLICT (enrollment_id, semester, slot_id)

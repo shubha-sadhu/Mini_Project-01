@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
     <style>
+        /* Full-screen blocker shown while the PDF is being generated */
         #pdfBlocker {
             position: fixed;
             inset: 0;
@@ -22,11 +23,7 @@
             cursor: wait;
         }
         #pdfBlocker.d-none { display: none; }
-        .pdf-blocker-box {
-            text-align: center;
-            color: #fff;
-            font-family: "Poppins", sans-serif;
-        }
+        .pdf-blocker-box { text-align: center; color: #fff; font-family: "Poppins", sans-serif; }
         .pdf-spinner {
             width: 48px;
             height: 48px;
@@ -36,9 +33,7 @@
             border-radius: 50%;
             animation: pdfSpin 0.9s linear infinite;
         }
-        @keyframes pdfSpin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes pdfSpin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -47,6 +42,7 @@
     <div class="overlay"></div>
 
     <div class="dashboard-layout">
+        
         <aside class="sidebar glass-panel" id="sidebar">
             <div class="sidebar-header">
                 <h2><i class="fa-solid fa-table-columns" style="margin-right: 8px;"></i> Dashboard</h2>
@@ -54,49 +50,45 @@
 
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-target="view-home">
-                    <i class="fa-solid fa-house"></i>
-                    <span data-translate="Home">Home</span>
+                    <i class="fa-solid fa-house"></i> <span data-translate="Home">Home</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-registration">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <span data-translate="Registration Form">Registration Form</span>
+                    <i class="fa-solid fa-pen-to-square"></i> <span data-translate="Registration Form">Registration Form</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-pdf">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Generate PDF</span>
-                </a>
+    <i class="fa-solid fa-file-pdf"></i>
+    <span>Generate PDF</span>
+</a>
                 <a href="#" class="nav-item" data-target="view-history">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span data-translate="History">History</span>
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-translate="History">History</span>
                 </a>
                 <a href="#" class="nav-item" data-target="view-settings">
-                    <i class="fa-solid fa-gear"></i>
-                    <span data-translate="Settings">Settings</span>
+                    <i class="fa-solid fa-gear"></i> <span data-translate="Settings">Settings</span>
                 </a>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="user-profile" id="sidebarUserProfile" style="cursor: pointer;" title="Go to Profile Settings">
-                    <div class="avatar"></div>
+                    <div class="avatar"></div> 
                     <div class="user-info">
                         <span class="name">Student</span>
                         <span class="roll"></span>
                     </div>
                 </div>
                 <a href="index.html" class="logout-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span data-translate="Logout">Logout</span>
+                    <i class="fa-solid fa-right-from-bracket"></i> <span data-translate="Logout">Logout</span>
                 </a>
             </div>
         </aside>
 
         <main class="main-content">
+            
             <header class="topbar solid-card">
                 <div class="topbar-left" style="display: flex; align-items: center; gap: 20px;">
                     <button class="action-btn" id="sidebarToggle" title="Toggle Sidebar">
                         <i class="fa-solid fa-bars"></i>
                     </button>
-
+                    
                     <div class="institute-banner-top" id="homeBanner">
                         <img src="./logo.png" alt="IIEST Logo" class="institute-logo" id="instituteLogo">
                         <div class="institute-text">
@@ -116,14 +108,12 @@
                         <i class="fa-solid fa-moon" id="themeIcon"></i>
                     </button>
                     <button class="action-btn" title="About">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span data-translate="About">About</span>
+                        <i class="fa-solid fa-circle-info"></i> <span data-translate="About">About</span>
                     </button>
-
+                    
                     <div class="dropdown">
                         <button class="action-btn dropbtn">
-                            <i class="fa-regular fa-circle-question"></i>
-                            <span data-translate="Help">Help</span>
+                            <i class="fa-regular fa-circle-question"></i> <span data-translate="Help">Help</span>
                         </button>
                         <div class="dropdown-content">
                             <a href="#"><i class="fa-solid fa-phone"></i> Contact Us</a>
@@ -134,8 +124,8 @@
             </header>
 
             <div class="content-area glass-panel">
-
-                <!-- HOME -->
+                
+                <!-- VIEW: HOME -->
                 <div id="view-home" class="view-section active">
                     <div class="home-main-col">
                         <div class="greeting-box glass-card">
@@ -158,15 +148,16 @@
                     </div>
                 </div>
 
-                <!-- REGISTRATION FORM -->
+                <!-- VIEW: REGISTRATION FORM -->
                 <div id="view-registration" class="view-section d-none">
                     <form class="registration-form glass-card" id="regForm">
                         <div class="form-title-wrapper">
                             <h2 class="gold-text">Semester Registration Form</h2>
                             <p class="subtitle">For Undergraduate / Postgraduate Courses</p>
                             <p id="autofillStatus" class="subtitle d-none" style="color: var(--danger, #e74c3c);"></p>
+                            <p class="subtitle">Your details come from college records and are locked. You can edit your name in Hindi and choose your open elective; click Submit Application to save.</p>
                         </div>
-
+    
                         <div class="form-section">
                             <div class="section-header">1. Personal & Academic Details</div>
                             <div class="section-body grid-2-col">
@@ -174,26 +165,21 @@
                                     <label>1(a). Name (in English)</label>
                                     <input type="text" id="regNameEnglish" placeholder="Enter your full name" class="glass-input readonly-input" readonly required>
                                 </div>
-
                                 <div class="input-group">
                                     <label>1(b). Name (in Hindi)</label>
                                     <div class="hindi-field">
-                                        <input type="text" id="regNameHindi" placeholder="Hindi name is managed in Profile Settings" class="glass-input hindi-input readonly-input" inputmode="none" autocomplete="off" maxlength="100" lang="hi" readonly>
-                                        <button type="button" class="action-btn hindi-kb-toggle" data-target="regNameHindi" title="Name is managed in Profile Settings" aria-label="Hindi name is read-only" disabled>
-                                            <i class="fa-regular fa-keyboard"></i>
-                                        </button>
+                                        <input type="text" id="regNameHindi" placeholder="Tap the keyboard icon to type in Hindi" class="glass-input hindi-input" inputmode="none" autocomplete="off" maxlength="100" lang="hi" required>
+                                        <button type="button" class="action-btn hindi-kb-toggle" data-target="regNameHindi" title="Open Hindi keyboard" aria-label="Open Hindi keyboard"><i class="fa-regular fa-keyboard"></i></button>
                                     </div>
-                                    <p class="hindi-hint">Change your Hindi name in Profile Settings. Only Hindi (Devanagari) characters are accepted.</p>
+                                    <p class="hindi-hint">Use the on-screen Hindi keyboard to enter your name. Only Hindi (Devanagari) characters are accepted.</p>
                                 </div>
-
                                 <div class="input-group">
                                     <label>2. Department</label>
-                                    <input type="text" id="regDepartment" placeholder="e.g. Computer Science and Technology (CST)" class="glass-input" required>
+                                    <input type="text" id="regDepartment" placeholder="e.g. Computer Science and Technology (CST)" class="glass-input readonly-input" readonly required>
                                 </div>
-
                                 <div class="input-group">
                                     <label>3. Programme</label>
-                                    <select class="glass-input" id="regProgramme">
+                                    <select class="glass-input readonly-input" id="regProgramme" disabled>
                                         <option value="" selected disabled>Select programme</option>
                                         <option value="B.Tech">B.Tech.</option>
                                         <option value="M.Tech">M.Tech.</option>
@@ -201,15 +187,13 @@
                                         <option value="PhD">PhD</option>
                                     </select>
                                 </div>
-
                                 <div class="input-group">
                                     <label>4. Specialization</label>
-                                    <input type="text" id="regSpecialization" placeholder="e.g. N/A" class="glass-input">
+                                    <input type="text" id="regSpecialization" placeholder="e.g. N/A" class="glass-input readonly-input" readonly>
                                 </div>
-
                                 <div class="input-group">
                                     <label>5. Registration for Semester</label>
-                                    <select class="glass-input" id="regSemester">
+                                    <select class="glass-input readonly-input" id="regSemester" disabled>
                                         <option value="" selected disabled>Select semester</option>
                                         <option value="1">1st Semester</option>
                                         <option value="2">2nd Semester</option>
@@ -221,38 +205,35 @@
                                         <option value="8">8th Semester</option>
                                     </select>
                                 </div>
-
                                 <div class="input-group">
                                     <label>6. Enrolment No</label>
                                     <input type="text" id="regEnrollment" placeholder="Enter your enrolment number" class="glass-input readonly-input" readonly required>
                                 </div>
-
                                 <div class="input-group">
                                     <label>7. G-suite ID</label>
                                     <input type="email" id="regGsuite" placeholder="your.id@students.iiests.ac.in" class="glass-input readonly-input" readonly required>
                                 </div>
-
                                 <div class="input-group">
                                     <label>8. Mobile No.</label>
-                                    <input type="tel" id="regMobile" placeholder="Enter your mobile number" class="glass-input" maxlength="10" required>
+                                    <input type="tel" id="regMobile" placeholder="Enter your mobile number" class="glass-input readonly-input" maxlength="10" readonly required>
                                 </div>
                             </div>
                         </div>
-
+    
                         <div class="form-section">
                             <div class="section-header">2. Details of Institute Fee Payment</div>
                             <div class="section-body grid-2-col">
                                 <div class="input-group">
                                     <label>9(a). Amount Paid (Rs.)</label>
-                                    <input type="number" id="regAmountPaid" placeholder="e.g. 45000" class="glass-input" min="0" step="1" oninput="this.value = Math.abs(this.value)" required>
+                                    <input type="number" id="regAmountPaid" placeholder="e.g. 45000" class="glass-input readonly-input" min="0" step="1" readonly required>
                                 </div>
                                 <div class="input-group">
                                     <label>9(b). Payment Date</label>
-                                    <input type="date" class="glass-input" id="paymentDate" required>
+                                    <input type="date" class="glass-input readonly-input" id="paymentDate" readonly required>
                                 </div>
                             </div>
                         </div>
-
+    
                         <div class="form-section">
                             <div class="section-header">3. Subject Details (Theory)</div>
                             <div class="section-body table-responsive">
@@ -265,16 +246,12 @@
                                             <th>Core/Elective</th>
                                             <th>Credit</th>
                                             <th>Remarks</th>
-                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <!-- Populated via JS -->
                                     </tbody>
                                 </table>
-                                <button type="button" class="add-row-btn" onclick="addRow('theoryTable')">
-                                    <i class="fa-solid fa-plus"></i> Add Row
-                                </button>
                             </div>
                         </div>
 
@@ -284,28 +261,39 @@
                                 I declare that the information provided is correct. I have carefully scrutinized the entered subjects.
                             </label>
                         </div>
-
+    
                         <div class="form-actions">
                             <button type="submit" class="submit-btn">Submit Application</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- GENERATE PDF -->
-                <div id="view-pdf" class="view-section d-none">
-                    <div class="form-title-wrapper">
-                        <h2 class="gold-text">Generate PDF</h2>
-                        <p class="subtitle">Generate and view your semester registration PDF.</p>
-                    </div>
+                <!-- VIEW: GENERATE PDF -->
+<div id="view-pdf" class="view-section d-none">
 
-                    <div class="pdf-container">
-                        <div id="pdfLoading" class="pdf-message d-none">Generating PDF...</div>
-                        <div id="pdfError" class="pdf-message d-none"></div>
-                        <iframe id="pdfViewer" title="Registration PDF"></iframe>
-                    </div>
-                </div>
+    <div class="form-title-wrapper">
+        <h2 class="gold-text">Generate PDF</h2>
+        <p class="subtitle">
+            Generate and view your semester registration PDF.
+        </p>
+    </div>
 
-                <!-- HISTORY -->
+    <div class="pdf-container">
+        <div id="pdfLoading" class="pdf-message d-none">
+            Generating PDF...
+        </div>
+
+        <div id="pdfError" class="pdf-message d-none"></div>
+
+        <iframe
+            id="pdfViewer"
+            title="Registration PDF">
+        </iframe>
+    </div>
+
+</div>
+
+                <!-- VIEW: HISTORY -->
                 <div id="view-history" class="view-section d-none">
                     <div class="form-title-wrapper">
                         <h2 class="gold-text" data-translate="History">Registration History</h2>
@@ -313,11 +301,12 @@
                     </div>
 
                     <div class="history-grid">
+                        <!-- Registration history will appear here once records exist. -->
                         <p class="subtitle" style="grid-column: 1 / -1;">No registration history yet.</p>
                     </div>
                 </div>
 
-                <!-- SETTINGS -->
+                <!-- VIEW: SETTINGS -->
                 <div id="view-settings" class="view-section d-none">
                     <div class="form-title-wrapper">
                         <h2 class="gold-text" data-translate="Account Settings">Account Settings</h2>
@@ -328,13 +317,12 @@
 
                     <div class="grid-2-col">
                         <div class="settings-left-col" style="display: flex; flex-direction: column; gap: 24px;">
+                            
                             <div class="form-section" id="profileSettingsSection" style="margin-bottom: 0;">
-                                <div class="section-header">
-                                    <i class="fa-solid fa-user"></i>
-                                    <span data-translate="Profile Settings">Profile Details</span>
-                                </div>
+                                <div class="section-header"><i class="fa-solid fa-user"></i> <span data-translate="Profile Settings">Profile Details</span></div>
                                 <div class="section-body">
                                     <form id="profileForm" style="display: flex; flex-direction: column; gap: 16px;">
+                                        
                                         <div class="profile-avatar-container">
                                             <div class="avatar-wrapper">
                                                 <div class="avatar large-avatar" id="settingsAvatar"></div>
@@ -346,9 +334,7 @@
                                             <div class="avatar-info">
                                                 <h4 style="color: var(--text-main);">Student</h4>
                                                 <p style="font-size: 0.8rem; color: var(--text-muted);"></p>
-                                                <button type="button" class="action-btn" id="removeAvatarBtn" style="padding: 4px 10px; font-size: 0.75rem; margin-top: 8px;">
-                                                    <i class="fa-solid fa-lock" style="font-size:0.6rem; margin-right:4px;"></i> Remove Photo
-                                                </button>
+                                                <button type="button" class="action-btn" id="removeAvatarBtn" style="padding: 4px 10px; font-size: 0.75rem; margin-top: 8px;"><i class="fa-solid fa-lock" style="font-size:0.6rem; margin-right:4px;"></i> Remove Photo</button>
                                             </div>
                                         </div>
 
@@ -356,24 +342,14 @@
                                             <label>Name (in English)</label>
                                             <input type="text" id="profileNameEnglish" value="" readonly class="readonly-input">
                                         </div>
-
                                         <div class="input-group">
                                             <label>Name (in Hindi)</label>
                                             <div class="hindi-field">
-                                                <input type="text" id="profileNameHindi" placeholder="Enter your Hindi name" class="glass-input hindi-input" inputmode="none" autocomplete="off" maxlength="100" lang="hi">
-                                                <button type="button" class="action-btn hindi-kb-toggle" data-target="profileNameHindi" title="Open Hindi keyboard" aria-label="Open Hindi keyboard">
-                                                    <i class="fa-regular fa-keyboard"></i>
-                                                </button>
-                                            </div>
-                                            <p class="hindi-hint">Only Hindi (Devanagari) characters are accepted.</p>
-                                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-                                                <button type="button" class="submit-btn" id="saveHindiNameBtn" style="margin:0; padding:8px 14px;">
-                                                    <i class="fa-solid fa-floppy-disk"></i> Save Hindi Name
-                                                </button>
-                                            </div>
-                                            <p id="hindiNameStatus" class="subtitle" role="status" aria-live="polite"></p>
+                                        <input type="text" id="profileNameHindi" placeholder="Tap the keyboard icon to type in Hindi" class="glass-input hindi-input" inputmode="none" autocomplete="off" maxlength="100" lang="hi">
+                                        <button type="button" class="action-btn hindi-kb-toggle" data-target="profileNameHindi" title="Open Hindi keyboard" aria-label="Open Hindi keyboard"><i class="fa-regular fa-keyboard"></i></button>
+                                    </div>
+                                    <p class="hindi-hint">Use the on-screen Hindi keyboard to enter your name. Only Hindi (Devanagari) characters are accepted.</p>
                                         </div>
-
                                         <div class="input-group">
                                             <label>Enrolment No.</label>
                                             <input type="text" id="profileEnrollment" value="" readonly class="readonly-input">
@@ -411,14 +387,13 @@
                                     </form>
                                 </div>
                             </div>
+
                         </div>
 
                         <div class="settings-right-col" style="display: flex; flex-direction: column; gap: 24px;">
+                            
                             <div class="form-section" style="margin-bottom: 0;">
-                                <div class="section-header">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                    <span data-translate="Security & Password">Security & Password</span>
-                                </div>
+                                <div class="section-header"><i class="fa-solid fa-shield-halved"></i> <span data-translate="Security & Password">Security & Password</span></div>
                                 <div class="section-body">
                                     <form id="securityForm" style="display: flex; flex-direction: column; gap: 16px;">
                                         <div class="input-group">
@@ -442,42 +417,31 @@
                                                 <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
                                             </div>
                                         </div>
-                                        <button type="submit" class="submit-btn" style="margin-top: 10px; padding: 12px;">
-                                            <i class="fa-solid fa-key"></i>
-                                            <span data-translate="Update Security">Update Password</span>
-                                        </button>
+                                        
+                                        <button type="submit" class="submit-btn" style="margin-top: 10px; padding: 12px;"><i class="fa-solid fa-key"></i> <span data-translate="Update Security">Update Password</span></button>
                                     </form>
                                 </div>
                             </div>
 
                             <div class="form-section" style="margin-bottom: 0;">
-                                <div class="section-header">
-                                    <i class="fa-solid fa-address-book"></i>
-                                    <span data-translate="Update Contact Info">Update Contact Info</span>
-                                </div>
+                                <div class="section-header"><i class="fa-solid fa-address-book"></i> <span data-translate="Update Contact Info">Update Contact Info</span></div>
                                 <div class="section-body">
                                     <form id="contactForm" style="display: flex; flex-direction: column; gap: 16px;">
                                         <div class="input-group">
                                             <label style="display: flex; align-items: center; justify-content: space-between;">
-                                                Mobile Number
-                                                <button type="button" id="editMobileBtn" class="edit-btn-inline" title="Verify to Edit">
-                                                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                                                </button>
+                                                Mobile Number 
+                                                <button type="button" id="editMobileBtn" class="edit-btn-inline" title="Verify to Edit"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                             </label>
                                             <input type="tel" id="mobileInput" placeholder="10-digit mobile number" class="glass-input readonly-input" pattern="[0-9]{10}" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="9876543210" required readonly>
                                         </div>
-                                        <button type="submit" id="saveMobileBtn" class="submit-btn" style="margin-top: 10px; padding: 12px;" disabled>
-                                            <i class="fa-solid fa-floppy-disk"></i> Save Mobile Number
-                                        </button>
+                                        
+                                        <button type="submit" id="saveMobileBtn" class="submit-btn" style="margin-top: 10px; padding: 12px;" disabled><i class="fa-solid fa-floppy-disk"></i> Save Mobile Number</button>
                                     </form>
                                 </div>
                             </div>
 
                             <div class="form-section" style="margin-bottom: 0;">
-                                <div class="section-header">
-                                    <i class="fa-solid fa-display"></i>
-                                    <span data-translate="Portal Preferences">Portal Preferences</span>
-                                </div>
+                                <div class="section-header"><i class="fa-solid fa-display"></i> <span data-translate="Portal Preferences">Portal Preferences</span></div>
                                 <div class="section-body" style="display: flex; flex-direction: column; gap: 16px;">
                                     <div class="input-group">
                                         <label>Portal Language (Auto-Translate)</label>
@@ -491,10 +455,7 @@
                             </div>
 
                             <div class="form-section" style="margin-bottom: 0;">
-                                <div class="section-header">
-                                    <i class="fa-solid fa-bell"></i>
-                                    <span data-translate="Notification Preferences">Notification Preferences</span>
-                                </div>
+                                <div class="section-header"><i class="fa-solid fa-bell"></i> <span data-translate="Notification Preferences">Notification Preferences</span></div>
                                 <div class="section-body" style="display: flex; flex-direction: column; gap: 15px;">
                                     <label class="checkbox-container">
                                         <input type="checkbox" checked> Email alerts for Fee Payments & Dues
@@ -510,9 +471,11 @@
                                     </label>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <footer>
@@ -524,13 +487,9 @@
     <!-- OTP VERIFICATION MODAL -->
     <div id="otpModalOverlay" class="modal-overlay d-none">
         <div class="modal-content glass-card">
-            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;">
-                <i class="fa-solid fa-shield-check"></i> Verify it's you
-            </h3>
-            <p class="subtitle" style="margin-bottom: 25px; font-size: 0.85rem;">
-                To protect your account, please confirm your password and enter the OTP sent to your registered G-Suite ID.
-            </p>
-
+            <h3 class="gold-text" style="font-size: 1.3rem; margin-bottom: 5px;"><i class="fa-solid fa-shield-check"></i> Verify it's you</h3>
+            <p class="subtitle" style="margin-bottom: 25px; font-size: 0.85rem;">To protect your account, please confirm your password and enter the OTP sent to your registered G-Suite ID.</p>
+            
             <form id="otpForm">
                 <div class="input-group" style="margin-bottom: 15px;">
                     <label>Account Password</label>

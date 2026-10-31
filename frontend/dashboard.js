@@ -1,8 +1,8 @@
 /*==================================================
         AUTH GUARD + LOAD LOGGED-IN USER'S PROFILE
 ==================================================*/
-const API_BASE = "http://localhost:5000/api/auth";
-const STUDENT_API = "http://localhost:5000/api/student";
+const API_BASE = "/api/auth";
+const STUDENT_API = "/api/student";
 
 // Student record loaded from the database (null until it arrives).
 let studentProfile = null;
@@ -930,7 +930,7 @@ if (pdfNavItem) {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/generatePdf",
+                "/api/generatePdf",
                 {
                     method: "POST",
                     headers: {

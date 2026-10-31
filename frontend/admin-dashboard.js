@@ -1,5 +1,5 @@
 /*ADMIN DASHBOARD - JS ENGINE*/
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "/api";
 const sessionToken = sessionStorage.getItem("sessionToken");
 
 if (!sessionToken) {
